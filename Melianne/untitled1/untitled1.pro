@@ -27,10 +27,12 @@ CONFIG += c++11
 SOURCES += \
         main.cpp \
         mainwindow.cpp \
+        numberplate.cpp \
         objectbwlabel.cpp
 
 HEADERS += \
         mainwindow.h \
+        numberplate.h \
         objectbwlabel.h
 
 FORMS += \
