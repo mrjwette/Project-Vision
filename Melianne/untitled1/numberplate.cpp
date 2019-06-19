@@ -5,6 +5,29 @@ Numberplate::Numberplate()
 
 }
 
+void Numberplate::init()
+{
+    QString filename = QFileDialog::getOpenFileName
+    (
+                this, "Open Document",QDir::currentPath(), "All files (*.*)"                            //opens a window where you can select a file
+    );
+
+    QImage image2(filename);
+
+    int h_min = H_MIN, h_max = H_MAX;
+    int s_min = S_MIN, s_max = S_MAX;
+    int v_min = V_MIN, v_max = V_MAX;
+    int x_max = 0, x_min = 0, y_max = 0, y_min = 0;
+
+    SetHSV(&image2, image2.height(), image2.width(), h_min, h_max, s_min, s_max, v_min, v_max, &x_min, &y_min, &x_max, &y_max);
+
+    image2 = image2.convertToFormat(QImage::Format_MonoLSB);
+    QRect rect(x_min, y_min,(x_max - x_min), (y_max - y_min));
+    image2 = image2.copy(rect);
+    QPixmap imagepix;
+    imagepix.convertFromImage(image2,Qt::AutoColor);
+    ui->photo->setPixmap(imagepix);
+}
 
 void Numberplate::loadMasks(int hoogte)
 {

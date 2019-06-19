@@ -19,6 +19,8 @@ public:
     int imheight;
     int imwidth;
     QString s;
+
+
 };
 
 #endif // OBJECT_H
