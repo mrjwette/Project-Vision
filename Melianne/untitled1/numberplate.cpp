@@ -5,28 +5,13 @@ Numberplate::Numberplate()
 
 }
 
-void Numberplate::init()
+void Numberplate::init(QImage *image2)
 {
-    QString filename = QFileDialog::getOpenFileName
-    (
-                this, "Open Document",QDir::currentPath(), "All files (*.*)"                            //opens a window where you can select a file
-    );
-
-    QImage image2(filename);
-
-    int h_min = H_MIN, h_max = H_MAX;
-    int s_min = S_MIN, s_max = S_MAX;
-    int v_min = V_MIN, v_max = V_MAX;
-    int x_max = 0, x_min = 0, y_max = 0, y_min = 0;
-
-    SetHSV(&image2, image2.height(), image2.width(), h_min, h_max, s_min, s_max, v_min, v_max, &x_min, &y_min, &x_max, &y_max);
-
-    image2 = image2.convertToFormat(QImage::Format_MonoLSB);
-    QRect rect(x_min, y_min,(x_max - x_min), (y_max - y_min));
-    image2 = image2.copy(rect);
+    *image2 = image2->convertToFormat(QImage::Format_MonoLSB);
+    QRect rect(x_min, y_min,x_max-x_min, y_max-y_min);
+    *image2 = image2->copy(rect);
     QPixmap imagepix;
-    imagepix.convertFromImage(image2,Qt::AutoColor);
-    ui->photo->setPixmap(imagepix);
+    imagepix.convertFromImage(*image2,Qt::AutoColor);
 }
 
 void Numberplate::loadMasks(int hoogte)
@@ -71,7 +56,7 @@ void Numberplate::loadMasks(int hoogte)
     maskers[35] = QPixmap ("C:\\Users\\2125228\\Documents\\MATLAB\\Foto\\Project\\Masks\\-.png").scaledToHeight(hoogte, Qt::SmoothTransformation);
 }
 
-int Numberplate::compareWithMasks(QImage image)
+int Numberplate::compareWithMasks(QImage *image)
 {
 
     double highestPercentage = 0;
@@ -83,21 +68,21 @@ int Numberplate::compareWithMasks(QImage image)
         qDebug() << maskerChar[i];
 
         QImage masks(maskers[i].toImage().convertToFormat(QImage::Format_Mono));
-        image = image.scaled(masks.width(), masks.height());
+        *image = image->scaled(masks.width(), masks.height());
 
-        for(int j = 0; j < image.height(); j++)
+        for(int j = 0; j < image->height(); j++)
         {
-            for(int k = 0; k < image.width(); k++)
+            for(int k = 0; k < image->width(); k++)
             {
                 QColor pixelMask = masks.pixel(k, j);
-                QColor pixelFoto = image.pixel(k, j);
+                QColor pixelFoto = image->pixel(k, j);
                 if(pixelMask == pixelFoto)
                 {
                     countCorrectPixels++;
                 }
             }
         }
-        double percentage = (countCorrectPixels/(image.height()*image.width()))*100.f;
+        double percentage = (countCorrectPixels/(image->height()*image->width()))*100.f;
         qDebug() << "Correct aantal pixels :" << percentage;
         qDebug() << "Hoogste corr aantal pixels: " << highestPercentage;
         if(percentage > highestPercentage)

@@ -12,16 +12,26 @@
 #define HSV_S 2.55      //Translate QT HSV Values to Paint.net values
 #define HSV_V 2.55      //Translate QT HSV Values to Paint.net values
 
-#include <QMainWindow>
+#define x_min 10
+#define y_min 10
+#define x_max 40
+#define y_max 60
+
+#include <QFileDialog>
+#include <QImage>
+#include <QString>
 #include <QDebug>
+#include <iostream>
+#include <vector>
+#include <algorithm>
 
 class Numberplate
 {
 public:
     Numberplate();
-    void init();
+    void init(QImage*);
     void loadMasks(int);
-    int compareWithMasks(QImage);
+    int compareWithMasks(QImage*);
 private:
     QPixmap maskers[36];
     char maskerChar[36] = {'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '-'};

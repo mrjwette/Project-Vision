@@ -14,16 +14,15 @@ class MainWindow : public QMainWindow
 public:
     explicit MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
-
-private slots:
     void SetHSV(QImage*, float, float, int, int, int, int, int, int, int*, int*, int*, int*);
+private slots:
     void on_numberplate_clicked();
     void on_letterDice_clicked();
-
-
 private:
     Ui::MainWindow *ui;
     QString url;
+
+friend class Numberplate;
 };
 
 #endif // MAINWINDOW_H
