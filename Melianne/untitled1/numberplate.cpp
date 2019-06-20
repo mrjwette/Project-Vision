@@ -34,10 +34,10 @@ void Numberplate::setHSV(QImage *image, float MaxpixY, float MaxpixX, int h_min,
     }
 }
 
-
+//this is the main function of the number plate assignment
 void Numberplate::init(QImage *image2)
 {
-    setHSV(image2, image2->height(), image2->width(), H_MIN, H_MAX, S_MIN, S_MAX, V_MIN, V_MAX);    //change the photo to a BW photo where the yellow pixels are set to white pixels
+    setHSV(image2, image2->height(), image2->width(), H_MIN, H_MAX, S_MIN, S_MAX, V_MIN, V_MAX);    //change the photo to a "BW photo" where the yellow pixels are set to white pixels
     *image2 = image2->convertToFormat(QImage::Format_Mono);                                         //change the photo to a BW photo
     //BW label en dan daarop rect uitvoeren
     //QRect rect(x_min, y_min,x_max-x_min, y_max-y_min);
