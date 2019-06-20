@@ -5,13 +5,47 @@ Numberplate::Numberplate()
 
 }
 
+void Numberplate::setHSV(QImage *image, float MaxpixY, float MaxpixX, int h_min, int h_max, int s_min, int s_max, int v_min, int v_max)
+{
+    for (int i = 0; i < MaxpixY; i++)
+    {
+        for (int j = 0; j < MaxpixX; j++)
+        {
+            QColor pixel(image->pixel(j, i));
+            int h, s, v;
+            pixel.getHsv(&h, &s, &v);
+            double H, S, V;
+            H = h / HSV_H;
+            S = s / HSV_S;
+            V = v / HSV_V;
+            //qDebug() << h << s << v;
+            if (H >= h_min && H <= h_max && S >= s_min && S <= s_max && V >= v_min && V <= v_max)
+            {
+                QRgb WHITE = qRgb(255, 255, 255);
+                image->setPixelColor(j, i, WHITE);
+            }
+            else
+            {
+                QRgb BLACK = qRgb(0, 0, 0);
+                image->setPixelColor(j, i, BLACK);
+            }
+        }
+    }
+}
+
 void Numberplate::init(QImage *image2)
 {
+    setHSV(image2, image2->height(), image2->width(), H_MIN, H_MAX, S_MIN, S_MAX, V_MIN, V_MAX);
     *image2 = image2->convertToFormat(QImage::Format_MonoLSB);
+    //BW label en dan daarop rect uitvoeren
     QRect rect(x_min, y_min,x_max-x_min, y_max-y_min);
     *image2 = image2->copy(rect);
-    QPixmap imagepix;
-    imagepix.convertFromImage(*image2,Qt::AutoColor);
+    loadMasks(image2->height());
+    for(int i = 0; i < 8; i++)
+    {
+        int index = compareWithMasks(image2);
+        output[i] = maskerChar[index];
+    }
 }
 
 void Numberplate::loadMasks(int hoogte)
@@ -58,7 +92,6 @@ void Numberplate::loadMasks(int hoogte)
 
 int Numberplate::compareWithMasks(QImage *image)
 {
-
     double highestPercentage = 0;
     int indexHighestPerc = 0;
     double countCorrectPixels = 0;
@@ -95,4 +128,10 @@ int Numberplate::compareWithMasks(QImage *image)
         countCorrectPixels = 0;
     }
     return indexHighestPerc;
+}
+
+QString Numberplate::getOutput()
+{
+    QString text = output;
+    return text;
 }

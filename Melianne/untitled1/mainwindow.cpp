@@ -45,9 +45,8 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
-void MainWindow::SetHSV(QImage *image, float MaxpixY, float MaxpixX, int h_min, int h_max, int s_min, int s_max, int v_min, int v_max, int* firstX, int* firstY, int* lastX, int* lastY)
+void MainWindow::SetHSV(QImage *image, float MaxpixY, float MaxpixX, int h_min, int h_max, int s_min, int s_max, int v_min, int v_max)
 {
-    int whitePixels = 0;
     for (int i = 0; i < MaxpixY; i++)
     {
         for (int j = 0; j < MaxpixX; j++)
@@ -64,17 +63,6 @@ void MainWindow::SetHSV(QImage *image, float MaxpixY, float MaxpixX, int h_min, 
             {
                 QRgb WHITE = qRgb(255, 255, 255);
                 image->setPixelColor(j, i, WHITE);
-                if(whitePixels == 0)
-                {
-                    *firstX = j;
-                    *firstY = i;
-                }
-                else
-                {
-                    *lastX = j;
-                    *lastY = i;
-                }
-                whitePixels++;
             }
             else
             {
@@ -469,14 +457,7 @@ void MainWindow::on_numberplate_clicked()
 
     QImage image2(filename);
 
-    int h_min = H_MIN, h_max = H_MAX;
-    int s_min = S_MIN, s_max = S_MAX;
-    int v_min = V_MIN, v_max = V_MAX;
-    int x_max = 0, x_min = 0, y_max = 0, y_min = 0;
-
-    SetHSV(&image2, image2.height(), image2.width(), h_min, h_max, s_min, s_max, v_min, v_max, &x_min, &y_min, &x_max, &y_max);
     Numberplate NP;
     NP.init(&image2);
-
-
+    ui->output->setText(NP.getOutput());
 }
