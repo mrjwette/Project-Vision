@@ -47,6 +47,7 @@ MainWindow::~MainWindow()
 
 void MainWindow::SetHSV(QImage *image, float MaxpixY, float MaxpixX, int h_min, int h_max, int s_min, int s_max, int v_min, int v_max)
 {
+    int whitePixels = 0;
     for (int i = 0; i < MaxpixY; i++)
     {
         for (int j = 0; j < MaxpixX; j++)
@@ -174,7 +175,8 @@ void BWlabel(QImage * image, int MaxpixY, int MaxpixX, ObjectBwLabel * objarray,
 //    }
 
     //Fix conflicts
-        for(int i = 0; i < conflictCounter; i++){
+        for(int i = 0; i < conflictCounter; i++)
+        {
             for(int y = 0; y < height; y++){
                 for(int x = 0; x < width; x++){
                     if(picarray[x][y] == conflicts[i][0]){
@@ -199,8 +201,10 @@ void BWlabel(QImage * image, int MaxpixY, int MaxpixX, ObjectBwLabel * objarray,
        //Count objects in the image. Stored in vector for easy pushing
        QVector<int> Objects;
         QVector<int>::iterator IT;
-        for(int y = 0; y < height; y++){
-            for(int x = 0; x < width; x++){
+        for(int y = 0; y < height; y++)
+        {
+            for(int x = 0; x < width; x++)
+            {
                 IT = find(Objects.begin(),Objects.end(),picarray[x][y]);
                 if(IT == Objects.end())
                 {
@@ -224,8 +228,10 @@ void BWlabel(QImage * image, int MaxpixY, int MaxpixX, ObjectBwLabel * objarray,
 
         //Count the amount of pixels per object.
         if(debugI)qDebug() << Objects;
-        for(int y = 0; y < height; y++){
-            for(int x = 0; x < width; x++){
+        for(int y = 0; y < height; y++)
+        {
+            for(int x = 0; x < width; x++)
+            {
                 if(picarray[x][y] != 0)
                 {
                     for(int i = 1;i<ObjAmount;i++)
@@ -241,7 +247,8 @@ void BWlabel(QImage * image, int MaxpixY, int MaxpixX, ObjectBwLabel * objarray,
         }
 
         //Retur the Labelcounter and amount of blocks in debug
-        if(debugI){
+        if(debugI)
+        {
             for(int i = 1;i<ObjAmount;i++)
             {
                  qDebug() << "LC: " << objarray[i].Labelcounter<< "BC: " << objarray[i].BlockCount;
@@ -271,8 +278,10 @@ void BWlabel(QImage * image, int MaxpixY, int MaxpixX, ObjectBwLabel * objarray,
         //per object checking each pixel to find the most Left, Right, Up and down pixel. These are stored in the object.
         for(int o = 0;o<ObjAmount;o++)
         {
-            for(int y = 0; y < height; y++){
-                for(int x = 0; x < width; x++){
+            for(int y = 0; y < height; y++)
+            {
+                for(int x = 0; x < width; x++)
+                {
                     if(picarray[x][y] == objarray[o].Labelcounter)
                     {
                         if(objarray[o].set == false)
@@ -284,16 +293,20 @@ void BWlabel(QImage * image, int MaxpixY, int MaxpixX, ObjectBwLabel * objarray,
                             objarray[o].set = true;
                         }
 
-                        if(x > objarray[o].R){
+                        if(x > objarray[o].R)
+                        {
                             objarray[o].R = x;
                         }
-                        if(x < objarray[o].L){
+                        if(x < objarray[o].L)
+                        {
                             objarray[o].L = x;
                         }
-                        if(y < objarray[o].U){
+                        if(y < objarray[o].U)
+                        {
                             objarray[o].U = y;
                         }
-                        if(y > objarray[o].D){
+                        if(y > objarray[o].D)
+                        {
                             objarray[o].D = y;
                         }
                     }

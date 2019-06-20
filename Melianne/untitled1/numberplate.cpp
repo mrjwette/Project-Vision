@@ -5,49 +5,53 @@ Numberplate::Numberplate()
 
 }
 
+//changes the all the pixels that are within the HSV range to white
+//all the other pixels will be changed to black
 void Numberplate::setHSV(QImage *image, float MaxpixY, float MaxpixX, int h_min, int h_max, int s_min, int s_max, int v_min, int v_max)
 {
-    for (int i = 0; i < MaxpixY; i++)
+    for (int i = 0; i < MaxpixY; i++)                                                               //walk through the photo
     {
         for (int j = 0; j < MaxpixX; j++)
         {
-            QColor pixel(image->pixel(j, i));
+            QColor pixel(image->pixel(j, i));                                                       //get the color of the pixel
             int h, s, v;
-            pixel.getHsv(&h, &s, &v);
+            pixel.getHsv(&h, &s, &v);                                                               //convert the color of the pixel from RGB to HSV
             double H, S, V;
-            H = h / HSV_H;
-            S = s / HSV_S;
-            V = v / HSV_V;
-            //qDebug() << h << s << v;
-            if (H >= h_min && H <= h_max && S >= s_min && S <= s_max && V >= v_min && V <= v_max)
+            H = h / HSV_H;                                                                          //convert the H value to the correct format (0-360)
+            S = s / HSV_S;                                                                          //convert the S value to the correct format (0-100)
+            V = v / HSV_V;                                                                          //convert the V value to the correct format (0-100)
+            if (H >= h_min && H <= h_max && S >= s_min && S <= s_max && V >= v_min && V <= v_max)   //check if the pixel value lies within the HSV range
             {
                 QRgb WHITE = qRgb(255, 255, 255);
-                image->setPixelColor(j, i, WHITE);
+                image->setPixelColor(j, i, WHITE);                                                  //if it does, change the pixel to white
             }
             else
             {
                 QRgb BLACK = qRgb(0, 0, 0);
-                image->setPixelColor(j, i, BLACK);
+                image->setPixelColor(j, i, BLACK);                                                  //if it does not, change the pixel to black
             }
         }
     }
 }
 
+
 void Numberplate::init(QImage *image2)
 {
-    setHSV(image2, image2->height(), image2->width(), H_MIN, H_MAX, S_MIN, S_MAX, V_MIN, V_MAX);
-    *image2 = image2->convertToFormat(QImage::Format_MonoLSB);
+    setHSV(image2, image2->height(), image2->width(), H_MIN, H_MAX, S_MIN, S_MAX, V_MIN, V_MAX);    //change the photo to a BW photo where the yellow pixels are set to white pixels
+    *image2 = image2->convertToFormat(QImage::Format_Mono);                                         //change the photo to a BW photo
     //BW label en dan daarop rect uitvoeren
-    QRect rect(x_min, y_min,x_max-x_min, y_max-y_min);
-    *image2 = image2->copy(rect);
-    loadMasks(image2->height());
+    //QRect rect(x_min, y_min,x_max-x_min, y_max-y_min);
+    //*image2 = image2->copy(rect);
+    loadMasks(image2->height());                                                                    //load all the masks and resize them to the height of the number plate
     for(int i = 0; i < 8; i++)
     {
-        int index = compareWithMasks(image2);
-        output[i] = maskerChar[index];
+        int index = compareWithMasks(image2);                                                       //compare the masks with the cropped image
+        output[i] = maskerChar[index];                                                              //fill the output array with the charachter that has the highest similarity
     }
 }
 
+//The masks are loaded according to the given height of the photo
+//This way the masks will fit perfectly over the number plate
 void Numberplate::loadMasks(int hoogte)
 {
     maskers[0] = QPixmap("C:\\Users\\2125228\\Documents\\MATLAB\\Foto\\Project\\Masks\\A.png").scaledToHeight(hoogte, Qt::SmoothTransformation);
@@ -90,20 +94,21 @@ void Numberplate::loadMasks(int hoogte)
     maskers[35] = QPixmap ("C:\\Users\\2125228\\Documents\\MATLAB\\Foto\\Project\\Masks\\-.png").scaledToHeight(hoogte, Qt::SmoothTransformation);
 }
 
+//This function compares the given image to all the available characters
 int Numberplate::compareWithMasks(QImage *image)
 {
     double highestPercentage = 0;
     int indexHighestPerc = 0;
     double countCorrectPixels = 0;
 
-    for(int i = 0; i < 36; i++)
+    for(int i = 0; i < 36; i++)                                                         //go through all the masks
     {
         qDebug() << maskerChar[i];
 
         QImage masks(maskers[i].toImage().convertToFormat(QImage::Format_Mono));
-        *image = image->scaled(masks.width(), masks.height());
+        *image = image->scaled(masks.width(), masks.height());                          //scale the image to the size of the mask
 
-        for(int j = 0; j < image->height(); j++)
+        for(int j = 0; j < image->height(); j++)                                        //go through the image to check how many pixels are the same as the masks
         {
             for(int k = 0; k < image->width(); k++)
             {
@@ -115,23 +120,24 @@ int Numberplate::compareWithMasks(QImage *image)
                 }
             }
         }
-        double percentage = (countCorrectPixels/(image->height()*image->width()))*100.f;
+        double percentage = (countCorrectPixels/(image->height()*image->width()))*100.f;    //convert the correct amount of pixels to a percentage
         qDebug() << "Correct aantal pixels :" << percentage;
         qDebug() << "Hoogste corr aantal pixels: " << highestPercentage;
         if(percentage > highestPercentage)
-        {
-            highestPercentage = percentage;
-            indexHighestPerc = i;
+        {                                                                                   //if the new percentage is higher than the highest percentage
+            highestPercentage = percentage;                                                 //change the highest percentage to the new percentage
+            indexHighestPerc = i;                                                           //set the index of the highest percentage to the index of the new highest percentage
         }
         qDebug() << "Nieuwe hoogste: " << highestPercentage;
         qDebug() << " ";
-        countCorrectPixels = 0;
+        countCorrectPixels = 0;                                                             //reset correct amount of pixels
     }
     return indexHighestPerc;
 }
 
+//returns the output of the numberplate in a QString
 QString Numberplate::getOutput()
 {
-    QString text = output;
-    return text;
+    QString text = output;                                                                  //change the char array output[] to a QString
+    return text;                                                                            //return the QString that contains all the chars of output[]
 }
