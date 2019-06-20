@@ -14,12 +14,11 @@ public:
 
     int Labelcounter;
     bool set = false;
-    int BlockCount;
+    int BlockCount = 0;
     QImage image;
-    int imheight;
-    int imwidth;
+    int imheight = 0;
+    int imwidth = 0;
     QString s;
-
 
 };
 

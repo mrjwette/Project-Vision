@@ -25,12 +25,14 @@ DEFINES += QT_DEPRECATED_WARNINGS
 CONFIG += c++11
 
 SOURCES += \
+        bwlabel.cpp \
         main.cpp \
         mainwindow.cpp \
         numberplate.cpp \
         objectbwlabel.cpp
 
 HEADERS += \
+        bwlabel.h \
         mainwindow.h \
         numberplate.h \
         objectbwlabel.h

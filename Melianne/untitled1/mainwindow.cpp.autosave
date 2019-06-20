@@ -400,7 +400,7 @@ void MainWindow::on_letterDice_clicked()
     int MaxpixX = image.width(); // Test is 10
     qDebug() << MaxpixX << MaxpixY;
 
-    SetHSV(&image,MaxpixY, MaxpixX );
+    //SetHSV(&image,MaxpixY, MaxpixX );
 
     ObjectBwLabel objarray[MAX_Capable_Objects];
     int ObjAmount = 0;

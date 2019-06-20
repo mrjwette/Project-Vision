@@ -12,6 +12,10 @@
 #define HSV_S 2.55      //Translate QT HSV Values to Paint.net values
 #define HSV_V 2.55      //Translate QT HSV Values to Paint.net values
 
+#define SCALING_FACTOR 4
+#define MAX_Capable_Objects 100
+
+#include "bwlabel.h"
 #include <QFileDialog>
 #include <QImage>
 #include <QString>

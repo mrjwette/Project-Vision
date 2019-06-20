@@ -39,9 +39,31 @@ void Numberplate::init(QImage *image2)
 {
     setHSV(image2, image2->height(), image2->width(), H_MIN, H_MAX, S_MIN, S_MAX, V_MIN, V_MAX);    //change the photo to a "BW photo" where the yellow pixels are set to white pixels
     *image2 = image2->convertToFormat(QImage::Format_Mono);                                         //change the photo to a BW photo
-    //BW label en dan daarop rect uitvoeren
-    //QRect rect(x_min, y_min,x_max-x_min, y_max-y_min);
-    //*image2 = image2->copy(rect);
+    BWLabel BWlab;
+    
+    /*
+    BWLabel bwlbl = BWLabel();
+    bwlbl.Setdebug(debugI);
+    bwlbl.SetImage(image);
+    bwlbl.SetResizefactor(Scalingfactor);
+    bwlbl.ResizeIm(&MaxpixY,&MaxpixX);
+    bwlbl.BWLabel_RegionProps(MaxpixY,MaxpixX, objarray, &ObjAmount,50);
+    bwlbl.SetImages(objarray, &ObjAmount);
+    QImage image1 = bwlbl.GetImage();
+    bwlbl.Removeborder(objarray, &ObjAmount);
+    */
+    int MaxpixY = image2->height();
+    int MaxpixX = image2->width();
+    ObjectBwLabel objarray[MAX_Capable_Objects];
+    int ObjAmount = 0;
+    
+    BWlab.SetImage(*image2);
+    BWlab.SetResizefactor(SCALING_FACTOR);
+    BWlab.ResizeIm(&MaxpixY, &MaxpixX);
+    BWlab.BWLabel_RegionProps(MaxpixY, MaxpixX, objarray, &ObjAmount, 50);
+    BWlab.SetImages(objarray, &ObjAmount);
+    QImage image1 = BWlab.GetImage();
+    
     loadMasks(image2->height());                                                                    //load all the masks and resize them to the height of the number plate
     for(int i = 0; i < 8; i++)
     {
