@@ -1,11 +1,10 @@
 #ifndef BWLABEL_H
 #define BWLABEL_H
 #include <QImage>
-#include <ObjectBwLabel.h>
 #include <qdebug.h>
 #include <QImage>
-#include "QString"
-#include "QDebug"
+#include <QString>
+#include <QDebug>
 #include <iostream>
 #include <vector>
 #include <algorithm>

@@ -235,7 +235,7 @@ void BWLabel::BWLabel_RegionProps(int MaxpixY, int MaxpixX, ObjectBwLabel * obja
     }
 
     //If the blockamount of a certain object is below the set threshold it will be removed from the list.
-    for(int i = 1;i<ObjAmount;i++)
+    for(int i = 0;i<ObjAmount;i++)
     {
         if(objarray[i].BlockCount < SmallesObj)
         {
@@ -258,7 +258,7 @@ void BWLabel::BWLabel_RegionProps(int MaxpixY, int MaxpixX, ObjectBwLabel * obja
     }
 
     //per object checking each pixel to find the most Left, Right, Up and down pixel. These are stored in the object.
-    for(int o = 1;o<ObjAmount;o++)
+    for(int o = 0;o<ObjAmount;o++)
     {
         for(int y = 0; y < MaxpixY; y++){
             for(int x = 0; x < MaxpixX; x++){

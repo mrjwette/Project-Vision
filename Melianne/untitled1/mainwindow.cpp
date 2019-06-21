@@ -17,11 +17,10 @@ using namespace std;
 #define MAXPICINPUTWIDTH 269 // Maximum width for a picture
 #define MAXPICINPUTHEIGHT 156 // Maximum height for a picture
 #define MAX_Capable_Objects 100 //Maximum amount objects possible per image, set well above expected object count
-#define MAX_Conflicts 15000 //Maximum amount of conflicts, set around 15000 for a 1920 x 1080 picture containing 5 objects.
 
 #define resize 1        //If you want to downscale images to smaller images for faster processing
 //When resize is set to 0, set scalingfactor to 1
-#define Scalingfactor 8         // Images get scaled down during the process. This is how much
+#define Scalingfactor 2         // Images get scaled down during the process. This is how much
 #define OFFSETPICADJUST 0 // When using images that do not resize well, increase this.
 #define OffsetBWLabel 2
 
@@ -34,6 +33,21 @@ using namespace std;
 
 #define S_Border 40     //Limit set to recoqnize Dice for HSV Saturation
 #define V_Border 67     //Limit set to recoqnize Dice for HSV Value
+/*
+#define H_MIN 0        //Limit set to recognize Numberplate for HSV Hue (minimum)
+#define H_MAX 360        //Limit set to recognize Numberplate for HSV Hue (maximum)
+#define S_MIN 0        //Limit set to recognize Numberplate for HSV Saturation (minimum)
+#define S_MAX 40       //Limit set to recognize Numberplate for HSV Saturation (maximum)
+#define V_MIN 67        //Limit set to recognize Numberplate for HSV Value (minimum)
+#define V_MAX 100       //Limit set to recognize Numberplate for HSV Value (maximum)
+*/
+
+#define H_MIN 30        //Limit set to recognize Numberplate for HSV Hue (minimum)
+#define H_MAX 55        //Limit set to recognize Numberplate for HSV Hue (maximum)
+#define S_MIN 60        //Limit set to recognize Numberplate for HSV Saturation (minimum)
+#define S_MAX 100       //Limit set to recognize Numberplate for HSV Saturation (maximum)
+#define V_MIN 75        //Limit set to recognize Numberplate for HSV Value (minimum)
+#define V_MAX 100       //Limit set to recognize Numberplate for HSV Value (maximum)
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -49,7 +63,6 @@ MainWindow::~MainWindow()
 
 void MainWindow::SetHSV(QImage *image, float MaxpixY, float MaxpixX, int h_min, int h_max, int s_min, int s_max, int v_min, int v_max)
 {
-    int whitePixels = 0;
     for (int i = 0; i < MaxpixY; i++)
     {
         for (int j = 0; j < MaxpixX; j++)
@@ -97,7 +110,7 @@ void BWlabel(QImage * image, int MaxpixY, int MaxpixX, ObjectBwLabel * objarray,
     auto width = MaxpixX;
     auto conflicts = new int[MAX_Conflicts][2];
     int conflictCounter = 0;
-    int temp = 0;
+    //int temp = 0;
 
 
     QRgb WHITE = qRgb(255,255,255);
@@ -389,10 +402,10 @@ void Removeborder(ObjectBwLabel * objarray, int * count)
 void MainWindow::on_letterDice_clicked()
 {
     QString filename =  QFileDialog::getOpenFileName(
-              this,
-              "Open Document",
-              QDir::currentPath(),
-              "All files (*.*) ;; Document files (*.doc *.rtf);; PNG files (*.png)");
+                this,
+                "Open Document",
+                QDir::currentPath(),
+                "All files (*.*) ;; Document files (*.doc *.rtf);; PNG files (*.png)");
     QImage image(filename);
     image = image.convertToFormat(QImage::Format_RGB32);
 
@@ -400,8 +413,13 @@ void MainWindow::on_letterDice_clicked()
     int MaxpixX = image.width(); // Test is 10
     qDebug() << MaxpixX << MaxpixY;
 
-    SetHSV(&image,MaxpixY, MaxpixX );
+    SetHSV(&image,MaxpixY, MaxpixX, H_MIN, H_MAX, S_MIN, S_MAX, V_MIN, V_MAX);
 
+    image = image.scaled(741, 431, Qt::KeepAspectRatio);
+    QPixmap pixmap;
+    pixmap.convertFromImage(image);
+    ui->photo->setPixmap(pixmap);
+    /*
     ObjectBwLabel objarray[MAX_Capable_Objects];
     int ObjAmount = 0;
 
@@ -416,43 +434,47 @@ void MainWindow::on_letterDice_clicked()
     bwlbl.Removeborder(objarray, &ObjAmount);
 
     QPixmap pixDobb[6];
-    for(int i = 1 ;i<ObjAmount;i++)
+    for(int i = 0 ;i<ObjAmount;i++)
     {
         ObjectBwLabel objarrayt[50];
-        ObjectBwLabel firstt;
-        objarrayt[0] = firstt;
         int ObjAmountt = 0;
-        //BWlabel(&objarray[i].image,objarray[i].imheight,objarray[i].imwidth,objarrayt,&ObjAmountt,0);
-        //objarray[i].s = QString::number(ObjAmountt - OffsetBWLabel);
-
-        QImage image2 = objarray[i].image.scaled(301, 201, Qt::KeepAspectRatio);
+        bwlbl.SetImage(objarray[i].image);
+        bwlbl.SetResizefactor(1);
+        bwlbl.Setdebug(1);
+        bwlbl.BWLabel_RegionProps(objarray[i].imheight,objarray[i].imwidth,objarrayt,&ObjAmountt,20);
+        objarray[i].s = QString::number(ObjAmountt);
+        objarray[i].image = bwlbl.GetImage();
+        QImage image2 = objarray[i].image.scaled(141, 91, Qt::KeepAspectRatio);
         QPixmap imagepix;
         imagepix.convertFromImage(image2,Qt::AutoColor);
         pixDobb[i] = imagepix;
     }
-    ui->output->setText(objarray[1].s);
-//    ui->output_2->setText(objarray[2].s);
-//    ui->output_3->setText(objarray[3].s);
-    ui->photo_2->setPixmap(pixDobb[1]);
-//    ui->photo_3->setPixmap(pixDobb[2]);
-//    ui->photo_4->setPixmap(pixDobb[3]);
-//    ui->photo_5->setPixmap(pixDobb[4]);
-    QImage image2 = image1.scaled(641, 411, Qt::KeepAspectRatio);
+    */
+    //ui->output->setText(objarray[0].s);
+    //ui->output_2->setText(objarray[1].s);
+    //ui->output_3->setText(objarray[2].s);
+    //ui->photo_2->setPixmap(pixDobb[0]);
+    //ui->photo_3->setPixmap(pixDobb[1]);
+    //ui->photo_4->setPixmap(pixDobb[2]);
+    //ui->photo_5->setPixmap(pixDobb[3]);
+    /*
+    QImage image2 = image1.scaled(741, 431, Qt::KeepAspectRatio);
     QPixmap imagepix;
     imagepix.convertFromImage(image2,Qt::AutoColor);
+
+    QPixmap Imageexport;
+    Imageexport.convertFromImage(objarray[1].image,Qt::AutoColor);
 
     if(Export)
     {
         QFile file("Export.png");
         file.open(QIODevice::WriteOnly);
-        imagepix.save(&file, "PNG");
+        Imageexport.save(&file, "PNG");
     }
-
-
     ui->photo->setPixmap(imagepix);
-
-
+    */
 }
+
 void MainWindow::on_numberplate_clicked()
 {
     QString filename = QFileDialog::getOpenFileName
@@ -460,9 +482,37 @@ void MainWindow::on_numberplate_clicked()
                 this, "Open Document",QDir::currentPath(), "All files (*.*)"                            //opens a window where you can select a file
                 );
 
-    QImage image2(filename);
+    QImage image(filename);
+    QImage image2 = image;
 
-    Numberplate NP;
-    NP.init(&image2);
-    ui->output->setText(NP.getOutput());
+    for (int i = 0; i < image2.height(); i++)
+    {
+        for (int j = 0; j < image2.width(); j++)
+        {
+            QColor pixel(image2.pixel(j, i));
+            int h, s, v;
+            pixel.getHsv(&h, &s, &v);
+            double H, S, V;
+            H = h / HSV_H;
+            S = s / HSV_S;
+            V = v / HSV_V;
+            //qDebug() << h << s << v;
+            if (H >= H_MIN && H <= H_MAX && S >= S_MIN && S <= S_MAX && V >= V_MIN && V <= V_MAX)
+            {
+                QRgb WHITE = qRgb(255, 255, 255);
+                image.setPixelColor(j, i, WHITE);
+            }
+            else
+            {
+                QRgb BLACK = qRgb(0, 0, 0);
+                image.setPixelColor(j, i, BLACK);
+            }
+        }
+    }
+
+    image2 = image2.convertToFormat(QImage::Format_Mono);                                         //change the photo to a BW photo
+
+    QPixmap pix;
+    pix.fromImage(image2);
+    ui->photo->setPixmap(pix);
 }

@@ -5,49 +5,43 @@ Numberplate::Numberplate()
 
 }
 
-//changes the all the pixels that are within the HSV range to white
-//all the other pixels will be changed to black
-void Numberplate::setHSV(QImage *image, float MaxpixY, float MaxpixX, int h_min, int h_max, int s_min, int s_max, int v_min, int v_max)
-{
-    for (int i = 0; i < MaxpixY; i++)                                                               //walk through the photo
-    {
-        for (int j = 0; j < MaxpixX; j++)
-        {
-            QColor pixel(image->pixel(j, i));                                                       //get the color of the pixel
-            int h, s, v;
-            pixel.getHsv(&h, &s, &v);                                                               //convert the color of the pixel from RGB to HSV
-            double H, S, V;
-            H = h / HSV_H;                                                                          //convert the H value to the correct format (0-360)
-            S = s / HSV_S;                                                                          //convert the S value to the correct format (0-100)
-            V = v / HSV_V;                                                                          //convert the V value to the correct format (0-100)
-            if (H >= h_min && H <= h_max && S >= s_min && S <= s_max && V >= v_min && V <= v_max)   //check if the pixel value lies within the HSV range
-            {
-                QRgb WHITE = qRgb(255, 255, 255);
-                image->setPixelColor(j, i, WHITE);                                                  //if it does, change the pixel to white
-            }
-            else
-            {
-                QRgb BLACK = qRgb(0, 0, 0);
-                image->setPixelColor(j, i, BLACK);                                                  //if it does not, change the pixel to black
-            }
-        }
-    }
-}
-
 //this is the main function of the number plate assignment
 void Numberplate::init(QImage *image2)
 {
-    setHSV(image2, image2->height(), image2->width(), H_MIN, H_MAX, S_MIN, S_MAX, V_MIN, V_MAX);    //change the photo to a "BW photo" where the yellow pixels are set to white pixels
-    *image2 = image2->convertToFormat(QImage::Format_Mono);                                         //change the photo to a BW photo
-    //BW label en dan daarop rect uitvoeren
-    //QRect rect(x_min, y_min,x_max-x_min, y_max-y_min);
-    //*image2 = image2->copy(rect);
+
+
+    /*
+    QPixmap pixNum[8];
+
+    for(int i = 0 ;i<ObjAmount;i++)
+        {
+            objarray[i].image.invertPixels();
+            ObjectBwLabel objarrayt[50];
+            ObjectBwLabel firstt;
+            objarrayt[0] = firstt;
+            int ObjAmountt = 0;
+            BWlab.SetImage(objarray[i].image);
+            BWlab.SetResizefactor(1);
+            BWlab.Setdebug(0);
+            BWlab.BWLabel_RegionProps(objarray[i].imheight,objarray[i].imwidth,objarrayt,&ObjAmountt,5);
+            objarray[i].s = QString::number(ObjAmountt);
+            objarray[i].image = BWlab.GetImage();
+            QImage image2 = objarray[i].image.scaled(301, 201, Qt::KeepAspectRatio);
+            QPixmap imagepix;
+            imagepix.convertFromImage(image2,Qt::AutoColor);
+            pixNum[i] = imagepix;
+        }
+
+
     loadMasks(image2->height());                                                                    //load all the masks and resize them to the height of the number plate
     for(int i = 0; i < 8; i++)
     {
-        int index = compareWithMasks(image2);                                                       //compare the masks with the cropped image
+        QImage photo(pixNum[i].toImage().convertToFormat(QImage::Format_Mono));
+        int index = compareWithMasks(&photo);                                                       //compare the masks with the cropped image
         output[i] = maskerChar[index];                                                              //fill the output array with the charachter that has the highest similarity
     }
+    */
+
 }
 
 //The masks are loaded according to the given height of the photo
@@ -140,4 +134,14 @@ QString Numberplate::getOutput()
 {
     QString text = output;                                                                  //change the char array output[] to a QString
     return text;                                                                            //return the QString that contains all the chars of output[]
+}
+
+void Numberplate::setPixmap(QPixmap pix)
+{
+    this->pixmap = pix;
+}
+
+QPixmap Numberplate::getPixmap()
+{
+    return pixmap;
 }
