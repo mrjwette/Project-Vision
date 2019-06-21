@@ -427,7 +427,6 @@ void MainWindow::on_letterDice_clicked()
     bwlbl.SetImages(objarray, &ObjAmount);
     QImage image1 = bwlbl.GetImage();
     bwlbl.Removeborder(objarray, &ObjAmount);
-
     qDebug() << ObjAmount;
 
 
