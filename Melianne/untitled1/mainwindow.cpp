@@ -20,11 +20,11 @@ using namespace std;
 
 #define resize 1        //If you want to downscale images to smaller images for faster processing
 //When resize is set to 0, set scalingfactor to 1
-#define Scalingfactor 2         // Images get scaled down during the process. This is how much
+#define Scalingfactor 1         // Images get scaled down during the process. This is how much
 #define OFFSETPICADJUST 0 // When using images that do not resize well, increase this.
 #define OffsetBWLabel 2
 
-#define debugI 0        //Set 1 for qDebug() << Set 0 for none
+#define debugI 1        //Set 1 for qDebug() << Set 0 for none
 #define Export 0        //If you want to export the image
 #define DROPOBJ 100     //If an object is less then 100 pixels bwlabel will not see it
 #define HSV_H 1         //Translate QT HSV Values to Paint.net values
@@ -415,11 +415,6 @@ void MainWindow::on_letterDice_clicked()
 
     SetHSV(&image,MaxpixY, MaxpixX, H_MIN, H_MAX, S_MIN, S_MAX, V_MIN, V_MAX);
 
-    image = image.scaled(741, 431, Qt::KeepAspectRatio);
-    QPixmap pixmap;
-    pixmap.convertFromImage(image);
-    ui->photo->setPixmap(pixmap);
-    /*
     ObjectBwLabel objarray[MAX_Capable_Objects];
     int ObjAmount = 0;
 
@@ -428,12 +423,16 @@ void MainWindow::on_letterDice_clicked()
     bwlbl.SetImage(image);
     bwlbl.SetResizefactor(Scalingfactor);
     bwlbl.ResizeIm(&MaxpixY,&MaxpixX);
-    bwlbl.BWLabel_RegionProps(MaxpixY,MaxpixX, objarray, &ObjAmount,50);
+    bwlbl.BWLabel_RegionProps(MaxpixY,MaxpixX, objarray, &ObjAmount,100);
     bwlbl.SetImages(objarray, &ObjAmount);
     QImage image1 = bwlbl.GetImage();
     bwlbl.Removeborder(objarray, &ObjAmount);
 
-    QPixmap pixDobb[6];
+    qDebug() << ObjAmount;
+
+
+
+    QPixmap pixDobb[8];
     for(int i = 0 ;i<ObjAmount;i++)
     {
         ObjectBwLabel objarrayt[50];
@@ -449,15 +448,16 @@ void MainWindow::on_letterDice_clicked()
         imagepix.convertFromImage(image2,Qt::AutoColor);
         pixDobb[i] = imagepix;
     }
-    */
+
+
     //ui->output->setText(objarray[0].s);
     //ui->output_2->setText(objarray[1].s);
     //ui->output_3->setText(objarray[2].s);
-    //ui->photo_2->setPixmap(pixDobb[0]);
-    //ui->photo_3->setPixmap(pixDobb[1]);
-    //ui->photo_4->setPixmap(pixDobb[2]);
-    //ui->photo_5->setPixmap(pixDobb[3]);
-    /*
+    ui->photo_2->setPixmap(pixDobb[0]);
+    ui->photo_3->setPixmap(pixDobb[1]);
+    ui->photo_4->setPixmap(pixDobb[2]);
+    ui->photo_5->setPixmap(pixDobb[3]);
+
     QImage image2 = image1.scaled(741, 431, Qt::KeepAspectRatio);
     QPixmap imagepix;
     imagepix.convertFromImage(image2,Qt::AutoColor);
@@ -472,7 +472,7 @@ void MainWindow::on_letterDice_clicked()
         Imageexport.save(&file, "PNG");
     }
     ui->photo->setPixmap(imagepix);
-    */
+
 }
 
 void MainWindow::on_numberplate_clicked()
