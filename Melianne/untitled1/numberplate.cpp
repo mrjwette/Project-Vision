@@ -101,10 +101,10 @@ int Numberplate::compareWithMasks(QImage *image)
 
     for(int i = 0; i < 36; i++)                                                             //go through all the masks
     {
-        //qDebug() << maskerChar[i];
+        qDebug() << maskerChar[i];
 
         QImage masks(maskers[i].toImage().convertToFormat(QImage::Format_Mono));
-        masks = masks.scaled(image->width(), image->height(), Qt::KeepAspectRatio);         //scale the image to the size of the mask
+        masks = masks.scaled(image->width(), image->height());         //scale the image to the size of the mask
 
         for(int j = 0; j < image->height(); j++)                                            //go through the image to check how many pixels are the same as the masks
         {
@@ -112,6 +112,7 @@ int Numberplate::compareWithMasks(QImage *image)
             {
                 QColor pixelMask = masks.pixel(k, j);
                 QColor pixelFoto = image->pixel(k, j);
+
                 if(pixelMask == pixelFoto)
                 {
                     countCorrectPixels++;
@@ -119,15 +120,15 @@ int Numberplate::compareWithMasks(QImage *image)
             }
         }
         double percentage = (countCorrectPixels/(image->height()*image->width()))*100.f;    //convert the correct amount of pixels to a percentage
-        //qDebug() << "Correct aantal pixels :" << percentage;
-        //qDebug() << "Hoogste corr aantal pixels: " << highestPercentage;
+        qDebug() << "Correct aantal pixels :" << percentage;
+        qDebug() << "Hoogste corr aantal pixels: " << highestPercentage;
         if(percentage > highestPercentage)
         {                                                                                   //if the new percentage is higher than the highest percentage
             highestPercentage = percentage;                                                 //change the highest percentage to the new percentage
             indexHighestPerc = i;                                                           //set the index of the highest percentage to the index of the new highest percentage
         }
-        //qDebug() << "Nieuwe hoogste: " << highestPercentage;
-        //qDebug() << " ";
+        qDebug() << "Nieuwe hoogste: " << highestPercentage;
+        qDebug() << " ";
         countCorrectPixels = 0;                                                             //reset correct amount of pixels
     }
     return indexHighestPerc;

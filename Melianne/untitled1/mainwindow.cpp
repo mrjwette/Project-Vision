@@ -91,34 +91,39 @@ void MainWindow::SetHSV(QImage *image, float MaxpixY, float MaxpixX, int h_min, 
 
 void MainWindow::sortOutput()
 {
+    qDebug() << "Voor Sorteren: ";
     for(int i = 0; i < 6; i++)
     {
-        qDebug() << outputOrder[i][0] << outputOrder [i][1];
+        qDebug() << outputInt[i] << outputChar[i];
     }
 
     qDebug();
 
-    for(int i = 5; i > 1; i--)
+    int out, in;
+
+    for (out = 6 - 1; out > 1; out--)
     {
-        for(int j = 0; j < i; j++)
+        for (in = 0; in < out; in++)
         {
-            if(outputOrder[i][0] > outputOrder[i+1][0])
+            if (outputInt[in] > outputInt[in + 1])
             {
-                char temp1 = outputOrder[i][0];
-                char temp2 = outputOrder[i][1];
+                int temp = outputInt[in];
+                char temp2 = outputChar[in];
 
-                outputOrder[i][0] = outputOrder[i+1][0];
-                outputOrder[i][1] = outputOrder[i+1][1];
+                outputInt[in] = outputInt[in+1];
+                outputChar[in] = outputChar[in+1];
 
-                outputOrder[i+1][0] = temp1;
-                outputOrder[i+1][1] = temp2;
+                outputInt[in+1] = temp;
+                outputChar[in+1] = temp2;
             }
         }
     }
 
+    qDebug();
+    qDebug() << "Na sorteren: ";
     for(int i = 0; i < 6; i++)
     {
-        qDebug() << outputOrder[i][0] << outputOrder [i][1];
+        qDebug() << outputInt [i] << outputChar[i];
     }
 }
 
@@ -155,7 +160,7 @@ void MainWindow::on_letterDice_clicked()
 
 
 
-    QPixmap pixDobb[8];
+    QPixmap pixDobb[6];
     for(int i = 0 ;i<ObjAmount;i++)
     {
         Numberplate NP;
@@ -169,16 +174,37 @@ void MainWindow::on_letterDice_clicked()
         objarray[i].image = bwlbl.GetImage();
         NP.loadMasks(objarray[i].image.height(), objarray[i].image.width());
         int index = NP.compareWithMasks(&objarray[i].image);
-        //outputOrder[i][0] = maskerChar[index];
-        outputOrder[i][1] = objarray->L;
+        outputChar[i] = maskerChar[index];
+        qDebug() << "L: " << objarray[i].L << "R: " << objarray[i].R << "U: " << objarray[i].U << "D: " << objarray[i].D;
+        outputInt[i] = objarray[i].L;
         QImage image2 = objarray[i].image.scaled(141, 91, Qt::KeepAspectRatio);
         QPixmap imagepix;
         imagepix.convertFromImage(image2,Qt::AutoColor);
         pixDobb[i] = imagepix;
+        ui->photo_1->setPixmap(imagepix);
     }
 
 
-    //sortOutput();
+    sortOutput();
+
+    QVector<char> outputPlate;
+
+    for (int i = 0; i < 6; i++)
+    {
+        outputPlate.push_back(outputChar[i]);
+        if(isdigit(outputChar[i]) && isalpha(outputChar[i+1]))
+        {
+            outputPlate.push_back('-');
+        }
+        else if(isalpha(outputChar[i]) && isdigit(outputChar[i+1]))
+        {
+            outputPlate.push_back('-');
+        }
+    }
+
+    string out(outputPlate.begin(), outputPlate.end());
+    QString out2 = QString::fromStdString(out);
+    ui->output->setText(out2);
 
     //ui->output->setText(objarray[0].s);
     //ui->output_2->setText(objarray[1].s);
@@ -211,7 +237,6 @@ void MainWindow::on_letterDice_clicked()
         Imageexport.save(&file, "PNG");
     }
     ui->photo->setPixmap(imagepix);
-
 }
 
 void MainWindow::on_numberplate_clicked()
