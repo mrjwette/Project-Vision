@@ -89,9 +89,37 @@ void MainWindow::SetHSV(QImage *image, float MaxpixY, float MaxpixX, int h_min, 
     }
 }
 
-bool MainWindow::compare(int i, int j)
+void MainWindow::sortOutput()
 {
-    return (i < j);
+    for(int i = 0; i < 6; i++)
+    {
+        qDebug() << outputOrder[i][0] << outputOrder [i][1];
+    }
+
+    qDebug();
+
+    for(int i = 5; i > 1; i--)
+    {
+        for(int j = 0; j < i; j++)
+        {
+            if(outputOrder[i][0] > outputOrder[i+1][0])
+            {
+                char temp1 = outputOrder[i][0];
+                char temp2 = outputOrder[i][1];
+
+                outputOrder[i][0] = outputOrder[i+1][0];
+                outputOrder[i][1] = outputOrder[i+1][1];
+
+                outputOrder[i+1][0] = temp1;
+                outputOrder[i+1][1] = temp2;
+            }
+        }
+    }
+
+    for(int i = 0; i < 6; i++)
+    {
+        qDebug() << outputOrder[i][0] << outputOrder [i][1];
+    }
 }
 
 void ResizePic(QImage * image, QImage * resizeimage, int MaxpixY, int MaxpixX)
@@ -406,93 +434,8 @@ void Removeborder(ObjectBwLabel * objarray, int * count)
 
 void MainWindow::on_letterDice_clicked()
 {
-    QString filename =  QFileDialog::getOpenFileName(
-                this,
-                "Open Document",
-                QDir::currentPath(),
-                "All files (*.*) ;; Document files (*.doc *.rtf);; PNG files (*.png)");
-    QImage image(filename);
-    image = image.convertToFormat(QImage::Format_RGB32);
-
-    int MaxpixY = image.height();//Test is 11
-    int MaxpixX = image.width(); // Test is 10
-    qDebug() << MaxpixX << MaxpixY;
-
-    SetHSV(&image,MaxpixY, MaxpixX, H_MIN, H_MAX, S_MIN, S_MAX, V_MIN, V_MAX);
-    image.invertPixels();
-
-    ObjectBwLabel objarray[MAX_Capable_Objects];
-    int ObjAmount = 0;
-
-    BWLabel bwlbl = BWLabel();
-    bwlbl.Setdebug(debugI);
-    bwlbl.SetImage(image);
-    bwlbl.SetResizefactor(Scalingfactor);
-    bwlbl.ResizeIm(&MaxpixY,&MaxpixX);
-    bwlbl.BWLabel_RegionProps(MaxpixY,MaxpixX, objarray, &ObjAmount,125);
-    bwlbl.SetImages(objarray, &ObjAmount);
-    QImage image1 = bwlbl.GetImage();
-    bwlbl.Removeborder(objarray, &ObjAmount);
-    qDebug() << ObjAmount;
 
 
-
-    QPixmap pixDobb[8];
-    for(int i = 0 ;i<ObjAmount;i++)
-    {
-        Numberplate NP;
-        ObjectBwLabel objarrayt[50];
-        int ObjAmountt = 0;
-        bwlbl.SetImage(objarray[i].image);
-        bwlbl.SetResizefactor(1);
-        bwlbl.Setdebug(1);
-        bwlbl.BWLabel_RegionProps(objarray[i].imheight,objarray[i].imwidth,objarrayt,&ObjAmountt,20);
-        objarray[i].s = QString::number(ObjAmountt);
-        objarray[i].image = bwlbl.GetImage();
-        NP.loadMasks(objarray[i].image.height(), objarray[i].image.width());
-        int index = NP.compareWithMasks(&objarray[i].image);
-        outputOrder[i][1] = maskerChar[index];
-        outputOrder[i][2] = objarray->L;
-        QImage image2 = objarray[i].image.scaled(141, 91, Qt::KeepAspectRatio);
-        QPixmap imagepix;
-        imagepix.convertFromImage(image2,Qt::AutoColor);
-        pixDobb[i] = imagepix;
-    }
-
-
-    sort(outputOrder, outputOrder+8, );
-
-    //ui->output->setText(objarray[0].s);
-    //ui->output_2->setText(objarray[1].s);
-    //ui->output_3->setText(objarray[2].s);
-
-    QPixmap img1;
-    img1.convertFromImage(image1, Qt::AutoColor);
-
-    ui->photo_1->setPixmap(pixDobb[0]);
-    ui->photo_2->setPixmap(pixDobb[1]);
-    ui->photo_3->setPixmap(pixDobb[2]);
-    ui->photo_4->setPixmap(pixDobb[3]);
-    ui->photo_5->setPixmap(pixDobb[4]);
-    ui->photo_6->setPixmap(pixDobb[5]);
-    ui->photo_7->setPixmap(pixDobb[6]);
-    ui->photo_8->setPixmap(pixDobb[7]);
-
-
-    QImage image2 = image1.scaled(741, 431, Qt::KeepAspectRatio);
-    QPixmap imagepix;
-    imagepix.convertFromImage(image2,Qt::AutoColor);
-
-    QPixmap Imageexport;
-    Imageexport.convertFromImage(objarray[1].image,Qt::AutoColor);
-
-    if(Export)
-    {
-        QFile file("Export.png");
-        file.open(QIODevice::WriteOnly);
-        Imageexport.save(&file, "PNG");
-    }
-    ui->photo->setPixmap(imagepix);
 
 }
 
