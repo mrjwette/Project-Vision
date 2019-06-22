@@ -18,9 +18,13 @@ public:
 private slots:
     void on_numberplate_clicked();
     void on_letterDice_clicked();
+    bool compare(int , int );
 private:
     Ui::MainWindow *ui;
     QString url;
+    char maskerChar[36] = {'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '-'};
+    char outputOrder[2][7] = {"124365","VZ228P"};
+    char output[8];
 };
 
 #endif // MAINWINDOW_H

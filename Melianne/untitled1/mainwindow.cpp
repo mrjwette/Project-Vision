@@ -18,13 +18,13 @@ using namespace std;
 #define MAXPICINPUTHEIGHT 156 // Maximum height for a picture
 #define MAX_Capable_Objects 100 //Maximum amount objects possible per image, set well above expected object count
 
-#define resize 1        //If you want to downscale images to smaller images for faster processing
+#define resize 0        //If you want to downscale images to smaller images for faster processing
 //When resize is set to 0, set scalingfactor to 1
 #define Scalingfactor 1         // Images get scaled down during the process. This is how much
 #define OFFSETPICADJUST 0 // When using images that do not resize well, increase this.
 #define OffsetBWLabel 2
 
-#define debugI 1        //Set 1 for qDebug() << Set 0 for none
+#define debugI 0        //Set 1 for qDebug() << Set 0 for none
 #define Export 0        //If you want to export the image
 #define DROPOBJ 100     //If an object is less then 100 pixels bwlabel will not see it
 #define HSV_H 1         //Translate QT HSV Values to Paint.net values
@@ -87,6 +87,11 @@ void MainWindow::SetHSV(QImage *image, float MaxpixY, float MaxpixX, int h_min, 
             }
         }
     }
+}
+
+bool MainWindow::compare(int i, int j)
+{
+    return (i < j);
 }
 
 void ResizePic(QImage * image, QImage * resizeimage, int MaxpixY, int MaxpixX)
@@ -414,6 +419,7 @@ void MainWindow::on_letterDice_clicked()
     qDebug() << MaxpixX << MaxpixY;
 
     SetHSV(&image,MaxpixY, MaxpixX, H_MIN, H_MAX, S_MIN, S_MAX, V_MIN, V_MAX);
+    image.invertPixels();
 
     ObjectBwLabel objarray[MAX_Capable_Objects];
     int ObjAmount = 0;
@@ -423,7 +429,7 @@ void MainWindow::on_letterDice_clicked()
     bwlbl.SetImage(image);
     bwlbl.SetResizefactor(Scalingfactor);
     bwlbl.ResizeIm(&MaxpixY,&MaxpixX);
-    bwlbl.BWLabel_RegionProps(MaxpixY,MaxpixX, objarray, &ObjAmount,100);
+    bwlbl.BWLabel_RegionProps(MaxpixY,MaxpixX, objarray, &ObjAmount,125);
     bwlbl.SetImages(objarray, &ObjAmount);
     QImage image1 = bwlbl.GetImage();
     bwlbl.Removeborder(objarray, &ObjAmount);
@@ -434,6 +440,7 @@ void MainWindow::on_letterDice_clicked()
     QPixmap pixDobb[8];
     for(int i = 0 ;i<ObjAmount;i++)
     {
+        Numberplate NP;
         ObjectBwLabel objarrayt[50];
         int ObjAmountt = 0;
         bwlbl.SetImage(objarray[i].image);
@@ -442,6 +449,10 @@ void MainWindow::on_letterDice_clicked()
         bwlbl.BWLabel_RegionProps(objarray[i].imheight,objarray[i].imwidth,objarrayt,&ObjAmountt,20);
         objarray[i].s = QString::number(ObjAmountt);
         objarray[i].image = bwlbl.GetImage();
+        NP.loadMasks(objarray[i].image.height(), objarray[i].image.width());
+        int index = NP.compareWithMasks(&objarray[i].image);
+        outputOrder[i][1] = maskerChar[index];
+        outputOrder[i][2] = objarray->L;
         QImage image2 = objarray[i].image.scaled(141, 91, Qt::KeepAspectRatio);
         QPixmap imagepix;
         imagepix.convertFromImage(image2,Qt::AutoColor);
@@ -449,13 +460,24 @@ void MainWindow::on_letterDice_clicked()
     }
 
 
+    sort(outputOrder, outputOrder+8, );
+
     //ui->output->setText(objarray[0].s);
     //ui->output_2->setText(objarray[1].s);
     //ui->output_3->setText(objarray[2].s);
-    ui->photo_2->setPixmap(pixDobb[0]);
-    ui->photo_3->setPixmap(pixDobb[1]);
-    ui->photo_4->setPixmap(pixDobb[2]);
-    ui->photo_5->setPixmap(pixDobb[3]);
+
+    QPixmap img1;
+    img1.convertFromImage(image1, Qt::AutoColor);
+
+    ui->photo_1->setPixmap(pixDobb[0]);
+    ui->photo_2->setPixmap(pixDobb[1]);
+    ui->photo_3->setPixmap(pixDobb[2]);
+    ui->photo_4->setPixmap(pixDobb[3]);
+    ui->photo_5->setPixmap(pixDobb[4]);
+    ui->photo_6->setPixmap(pixDobb[5]);
+    ui->photo_7->setPixmap(pixDobb[6]);
+    ui->photo_8->setPixmap(pixDobb[7]);
+
 
     QImage image2 = image1.scaled(741, 431, Qt::KeepAspectRatio);
     QPixmap imagepix;
