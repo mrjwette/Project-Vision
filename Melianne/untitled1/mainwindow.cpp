@@ -233,27 +233,104 @@ void MainWindow::on_letterDice_clicked()
 
 void MainWindow::on_numberplate_clicked()
 {
-    QString filename = QFileDialog::getOpenFileName
-            (
-                this, "Open Document",QDir::currentPath(), "All files (*.*)"                            //opens a window where you can select a file
-                );
-
+    QString filename =  QFileDialog::getOpenFileName(
+                this,
+                "Open Document",
+                QDir::currentPath(),
+                "All files (*.*) ;; Document files (*.doc *.rtf);; PNG files (*.png)");
     QImage image(filename);
-    QImage image2 = image;
+    image = image.convertToFormat(QImage::Format_RGB32);
 
-    SetHSV(&image2, image2.height(), image2.width(), H_MIN, H_MAX, S_MIN, S_MAX, V_MIN, V_MAX);
-    image2 = image2.convertToFormat(QImage::Format_Mono);                                         //change the photo to a BW photo
+    int MaxpixY = image.height();//Test is 11
+    int MaxpixX = image.width(); // Test is 10
+    qDebug() << MaxpixX << MaxpixY;
 
-    Numberplate NP;
-    NP.loadMasks(image2.height(), image2.width());
-    int index = NP.compareWithMasks(&image2);
-    outputChar[0] = maskerChar[index];
-    QString out = outputChar;
+    SetHSV(&image,MaxpixY, MaxpixX, H_MIN, H_MAX, S_MIN, S_MAX, V_MIN, V_MAX);
+    image.invertPixels();
 
-    ui->output->setText(out);
+    ObjectBwLabel objarray[MAX_Capable_Objects];
+    int ObjAmount = 0;
 
-    QPixmap pix;
-    pix.convertFromImage(image2);
-    ui->photo->setPixmap(pix);
+    BWLabel bwlbl = BWLabel();
+    bwlbl.Setdebug(debugI);
+    bwlbl.SetImage(image);
+    bwlbl.SetResizefactor(Scalingfactor);
+    bwlbl.ResizeIm(&MaxpixY,&MaxpixX);
+    bwlbl.BWLabel_RegionProps(MaxpixY,MaxpixX, objarray, &ObjAmount,125);
+    bwlbl.SetImages(objarray, &ObjAmount);
+    QImage image1 = bwlbl.GetImage();
+    bwlbl.Removeborder(objarray, &ObjAmount);
+    QRect rect(objarray->L, objarray->R, objarray->R - objarray->L, objarray->D - objarray->U);
+    image1.copy(rect);
+    int minArea = (image1.height()*image1.width()/100)*3;
 
+    QPixmap pixDobb[6];
+    for(int i = 0 ;i<ObjAmount;i++)
+    {
+        Numberplate NP;
+        ObjectBwLabel objarrayt[50];
+        int ObjAmountt = 0;
+        bwlbl.SetImage(objarray[i].image);
+        bwlbl.SetResizefactor(1);
+        bwlbl.Setdebug(1);
+        bwlbl.BWLabel_RegionProps(objarray[i].imheight,objarray[i].imwidth,objarrayt,&ObjAmountt,minArea);
+        objarray[i].s = QString::number(ObjAmountt);
+        objarray[i].image = bwlbl.GetImage();
+        NP.loadMasks(objarray[i].image.height(), objarray[i].image.width());
+        int index = NP.compareWithMasks(&objarray[i].image);
+        outputChar[i] = maskerChar[index];
+        qDebug() << "L: " << objarray[i].L << "R: " << objarray[i].R << "U: " << objarray[i].U << "D: " << objarray[i].D;
+        outputInt[i] = objarray[i].L;
+        QImage image2 = objarray[i].image.scaled(141, 91, Qt::KeepAspectRatio);
+        QPixmap imagepix;
+        imagepix.convertFromImage(image2,Qt::AutoColor);
+        pixDobb[i] = imagepix;
+        ui->photo_1->setPixmap(imagepix);
+    }
+
+    sortOutput();
+
+    QVector<char> outputPlate;
+
+    for (int i = 0; i < 6; i++)
+    {
+        outputPlate.push_back(outputChar[i]);
+        if(isdigit(outputChar[i]) && isalpha(outputChar[i+1]))
+        {
+            outputPlate.push_back('-');
+        }
+        else if(isalpha(outputChar[i]) && isdigit(outputChar[i+1]))
+        {
+            outputPlate.push_back('-');
+        }
+    }
+
+    string out(outputPlate.begin(), outputPlate.end());
+    QString out2 = QString::fromStdString(out);
+    ui->output->setText(out2);
+
+    ui->photo_1->setPixmap(pixDobb[0]);
+    ui->photo_2->setPixmap(pixDobb[1]);
+    ui->photo_3->setPixmap(pixDobb[2]);
+    ui->photo_4->setPixmap(pixDobb[3]);
+    ui->photo_5->setPixmap(pixDobb[4]);
+    ui->photo_6->setPixmap(pixDobb[5]);
+
+    QImage image2 = image1.scaled(741, 431, Qt::KeepAspectRatio);
+    QPixmap imagepix;
+    imagepix.convertFromImage(image2,Qt::AutoColor);
+
+    ui->photo->setPixmap(imagepix);
+
+
+    QPixmap Imageexport;
+    Imageexport.convertFromImage(objarray[1].image,Qt::AutoColor);
+
+    //to export the photo, please change the definition of Export to 1
+    if(Export)
+    {
+        QFile file("Export.png");
+        file.open(QIODevice::WriteOnly);
+        Imageexport.save(&file, "PNG");
+    }
 }
