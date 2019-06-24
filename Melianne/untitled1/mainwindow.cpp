@@ -257,7 +257,7 @@ void MainWindow::on_numberplate_clicked()
     bwlbl.SetImage(image);
     bwlbl.SetResizefactor(Scalingfactor);
     bwlbl.ResizeIm(&MaxpixY,&MaxpixX);
-    bwlbl.BWLabel_RegionProps(MaxpixY,MaxpixX, objarray, &ObjAmount,125);
+    bwlbl.BWLabel_RegionProps(MaxpixY,MaxpixX, objarray, &ObjAmount,150);
     bwlbl.SetImages(objarray, &ObjAmount);
     bwlbl.Removeborder(objarray, &ObjAmount);
 
@@ -270,7 +270,7 @@ void MainWindow::on_numberplate_clicked()
         bwlbl.SetImage(objarray[i].image);
         bwlbl.SetResizefactor(1);
         bwlbl.Setdebug(1);
-        bwlbl.BWLabel_RegionProps(objarray[i].imheight,objarray[i].imwidth,objarrayt,&ObjAmountt,50);
+        bwlbl.BWLabel_RegionProps(objarray[i].imheight,objarray[i].imwidth,objarrayt,&ObjAmountt,100);
         objarray[i].s = QString::number(ObjAmountt);
         objarray[i].image = bwlbl.GetImage();
         NP.loadMasks(objarray[i].image.height(), objarray[i].image.width());
@@ -282,7 +282,6 @@ void MainWindow::on_numberplate_clicked()
         QPixmap imagepix;
         imagepix.convertFromImage(image2,Qt::AutoColor);
         pixDobb[i] = imagepix;
-        ui->photo_1->setPixmap(imagepix);
     }
 
     sortOutput();
@@ -313,11 +312,11 @@ void MainWindow::on_numberplate_clicked()
     ui->photo_5->setPixmap(pixDobb[4]);
     ui->photo_6->setPixmap(pixDobb[5]);
 
-    QImage image2 = image.scaled(741, 431, Qt::KeepAspectRatio);
-    QPixmap imagepix;
-    imagepix.convertFromImage(image2,Qt::AutoColor);
-
-    ui->photo->setPixmap(imagepix);
+    image.invertPixels();
+    image = image.scaled(741, 431, Qt::KeepAspectRatio);
+    QPixmap pix;
+    pix.convertFromImage(image);
+    ui->photo->setPixmap(pix);
 
 
     QPixmap Imageexport;

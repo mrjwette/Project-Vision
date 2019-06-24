@@ -1,5 +1,6 @@
 #ifndef ObjectObjectBwLabel_H
 #define ObjectObjectBwLabel_H
+
 #include <qimage.h>
 
 class ObjectBwLabel
