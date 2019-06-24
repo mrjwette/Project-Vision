@@ -91,39 +91,34 @@ void MainWindow::SetHSV(QImage *image, float MaxpixY, float MaxpixX, int h_min, 
 
 void MainWindow::sortOutput()
 {
-    qDebug() << "Voor Sorteren: ";
     for(int i = 0; i < 6; i++)
     {
-        qDebug() << outputInt[i] << outputChar[i];
+        qDebug() << outputOrder[i][0] << outputOrder [i][1];
     }
 
     qDebug();
 
-    int out, in;
-
-    for (out = 6 - 1; out > 1; out--)
+    for(int i = 5; i > 1; i--)
     {
-        for (in = 0; in < out; in++)
+        for(int j = 0; j < i; j++)
         {
-            if (outputInt[in] > outputInt[in + 1])
+            if(outputOrder[i][0] > outputOrder[i+1][0])
             {
-                int temp = outputInt[in];
-                char temp2 = outputChar[in];
+                char temp1 = outputOrder[i][0];
+                char temp2 = outputOrder[i][1];
 
-                outputInt[in] = outputInt[in+1];
-                outputChar[in] = outputChar[in+1];
+                outputOrder[i][0] = outputOrder[i+1][0];
+                outputOrder[i][1] = outputOrder[i+1][1];
 
-                outputInt[in+1] = temp;
-                outputChar[in+1] = temp2;
+                outputOrder[i+1][0] = temp1;
+                outputOrder[i+1][1] = temp2;
             }
         }
     }
 
-    qDebug();
-    qDebug() << "Na sorteren: ";
     for(int i = 0; i < 6; i++)
     {
-        qDebug() << outputInt [i] << outputChar[i];
+        qDebug() << outputOrder[i][0] << outputOrder [i][1];
     }
 }
 
@@ -174,9 +169,14 @@ void MainWindow::on_letterDice_clicked()
         objarray[i].image = bwlbl.GetImage();
         NP.loadMasks(objarray[i].image.height(), objarray[i].image.width());
         int index = NP.compareWithMasks(&objarray[i].image);
+<<<<<<< HEAD
         outputChar[i] = maskerChar[index];
         outputInt[i] = objarray[i].L;
         qDebug() << "L: " << objarray[i].L <<  "R: " << objarray[i].R << "U: " << objarray[i].U << "D: " << objarray[i].D;
+=======
+        //outputOrder[i][0] = maskerChar[index];
+        outputOrder[i][1] = objarray->L;
+>>>>>>> parent of 3faa7af... compatible met VZ288P
         QImage image2 = objarray[i].image.scaled(141, 91, Qt::KeepAspectRatio);
         QPixmap imagepix;
         imagepix.convertFromImage(image2,Qt::AutoColor);
@@ -184,7 +184,11 @@ void MainWindow::on_letterDice_clicked()
     }
 
 
+<<<<<<< HEAD
     sortOutput();
+=======
+    //sortOutput();
+>>>>>>> parent of 3faa7af... compatible met VZ288P
 
     //ui->output->setText(objarray[0].s);
     //ui->output_2->setText(objarray[1].s);
