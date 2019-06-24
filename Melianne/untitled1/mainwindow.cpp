@@ -246,6 +246,7 @@ void MainWindow::on_numberplate_clicked()
     qDebug() << MaxpixX << MaxpixY;
 
     SetHSV(&image,MaxpixY, MaxpixX, H_MIN, H_MAX, S_MIN, S_MAX, V_MIN, V_MAX);
+
     image.invertPixels();
 
     ObjectBwLabel objarray[MAX_Capable_Objects];
@@ -258,11 +259,7 @@ void MainWindow::on_numberplate_clicked()
     bwlbl.ResizeIm(&MaxpixY,&MaxpixX);
     bwlbl.BWLabel_RegionProps(MaxpixY,MaxpixX, objarray, &ObjAmount,125);
     bwlbl.SetImages(objarray, &ObjAmount);
-    QImage image1 = bwlbl.GetImage();
     bwlbl.Removeborder(objarray, &ObjAmount);
-    QRect rect(objarray->L, objarray->R, objarray->R - objarray->L, objarray->D - objarray->U);
-    image1.copy(rect);
-    int minArea = (image1.height()*image1.width()/100)*3;
 
     QPixmap pixDobb[6];
     for(int i = 0 ;i<ObjAmount;i++)
@@ -273,7 +270,7 @@ void MainWindow::on_numberplate_clicked()
         bwlbl.SetImage(objarray[i].image);
         bwlbl.SetResizefactor(1);
         bwlbl.Setdebug(1);
-        bwlbl.BWLabel_RegionProps(objarray[i].imheight,objarray[i].imwidth,objarrayt,&ObjAmountt,minArea);
+        bwlbl.BWLabel_RegionProps(objarray[i].imheight,objarray[i].imwidth,objarrayt,&ObjAmountt,50);
         objarray[i].s = QString::number(ObjAmountt);
         objarray[i].image = bwlbl.GetImage();
         NP.loadMasks(objarray[i].image.height(), objarray[i].image.width());
@@ -316,7 +313,7 @@ void MainWindow::on_numberplate_clicked()
     ui->photo_5->setPixmap(pixDobb[4]);
     ui->photo_6->setPixmap(pixDobb[5]);
 
-    QImage image2 = image1.scaled(741, 431, Qt::KeepAspectRatio);
+    QImage image2 = image.scaled(741, 431, Qt::KeepAspectRatio);
     QPixmap imagepix;
     imagepix.convertFromImage(image2,Qt::AutoColor);
 
