@@ -139,8 +139,6 @@ void MainWindow::on_letterDice_clicked()
 
     int MaxpixY = image.height();//Test is 11
     int MaxpixX = image.width(); // Test is 10
-/*    int area = image.height()*image.width();
-    int removeObjects = area/100; */                                                  //objects smaller than 1% of the photo will not be included in bwlabel
     qDebug() << MaxpixX << MaxpixY;
 
     SetHSV(&image,MaxpixY, MaxpixX, H_MIN, H_MAX, S_MIN, S_MAX, V_MIN, V_MAX);
@@ -154,7 +152,7 @@ void MainWindow::on_letterDice_clicked()
     bwlbl.SetImage(image);
     bwlbl.SetResizefactor(Scalingfactor);
     bwlbl.ResizeIm(&MaxpixY,&MaxpixX);
-    bwlbl.BWLabel_RegionProps(MaxpixY,MaxpixX, objarray, &ObjAmount,50);
+    bwlbl.BWLabel_RegionProps(MaxpixY,MaxpixX, objarray, &ObjAmount,125);
     bwlbl.SetImages(objarray, &ObjAmount);
     QImage image1 = bwlbl.GetImage();
     bwlbl.Removeborder(objarray, &ObjAmount);
@@ -221,8 +219,8 @@ void MainWindow::on_letterDice_clicked()
     ui->photo_4->setPixmap(pixDobb[3]);
     ui->photo_5->setPixmap(pixDobb[4]);
     ui->photo_6->setPixmap(pixDobb[5]);
-    //ui->photo_7->setPixmap(pixDobb[6]);
-    //ui->photo_8->setPixmap(pixDobb[7]);
+    ui->photo_7->setPixmap(pixDobb[6]);
+    ui->photo_8->setPixmap(pixDobb[7]);
 
 
     QImage image2 = image1.scaled(741, 431, Qt::KeepAspectRatio);
@@ -249,91 +247,36 @@ void MainWindow::on_numberplate_clicked()
                 );
 
     QImage image(filename);
+    QImage image2 = image;
 
-    int MaxpixY = image.height();
-    int MaxpixX = image.width();
-    ObjectBwLabel objarray[MAX_Capable_Objects];
-    int ObjAmount = 0;
-/*    int area = image1.height()*image1.width();
-    int removeObjects = area/100;   */                                                //objects smaller than 1% of the photo will not be included in bwlabel
-
-    SetHSV(&image,MaxpixY, MaxpixX, H_MIN, H_MAX, S_MIN, S_MAX, V_MIN, V_MAX);
-    image.invertPixels();
-
-    BWLabel bwlbl = BWLabel();
-    bwlbl.Setdebug(debugI);
-    bwlbl.SetImage(image);
-    bwlbl.SetResizefactor(Scalingfactor);
-    bwlbl.ResizeIm(&MaxpixY,&MaxpixX);
-    bwlbl.BWLabel_RegionProps(MaxpixY,MaxpixX, objarray, &ObjAmount,50);
-    bwlbl.SetImages(objarray, &ObjAmount);
-    QImage image1 = bwlbl.GetImage();
-    qDebug() << image1.height() << image1.width();
-    bwlbl.Removeborder(objarray, &ObjAmount);
-    qDebug() << ObjAmount;
-
-    QPixmap pixDobb[6];
-    for(int i = 0 ;i<ObjAmount;i++)
+    for (int i = 0; i < image2.height(); i++)
     {
-        Numberplate NP;
-        ObjectBwLabel objarrayt[50];
-        int ObjAmountt = 0;
-        bwlbl.SetImage(objarray[i].image);
-        bwlbl.SetResizefactor(1);
-        bwlbl.Setdebug(1);
-        bwlbl.BWLabel_RegionProps(objarray[i].imheight,objarray[i].imwidth,objarrayt,&ObjAmountt,20);
-        objarray[i].s = QString::number(ObjAmountt);
-        objarray[i].image = bwlbl.GetImage();
-        NP.loadMasks(objarray[i].image.height(), objarray[i].image.width());
-        int index = NP.compareWithMasks(&objarray[i].image);
-        outputChar[i] = maskerChar[index];
-        qDebug() << "L: " << objarray[i].L << "R: " << objarray[i].R << "U: " << objarray[i].U << "D: " << objarray[i].D;
-        outputInt[i] = objarray[i].L;
-        QImage image2 = objarray[i].image.scaled(141, 91, Qt::KeepAspectRatio);
-        QPixmap imagepix;
-        imagepix.convertFromImage(image2,Qt::AutoColor);
-        pixDobb[i] = imagepix;
-        ui->photo_1->setPixmap(imagepix);
-    }
-
-
-    sortOutput();
-
-    QVector<char> outputPlate;
-
-    for (int i = 0; i < 6; i++)
-    {
-        outputPlate.push_back(outputChar[i]);
-        if(isdigit(outputChar[i]) && isalpha(outputChar[i+1]))
+        for (int j = 0; j < image2.width(); j++)
         {
-            outputPlate.push_back('-');
-        }
-        else if(isalpha(outputChar[i]) && isdigit(outputChar[i+1]))
-        {
-            outputPlate.push_back('-');
+            QColor pixel(image2.pixel(j, i));
+            int h, s, v;
+            pixel.getHsv(&h, &s, &v);
+            double H, S, V;
+            H = h / HSV_H;
+            S = s / HSV_S;
+            V = v / HSV_V;
+            //qDebug() << h << s << v;
+            if (H >= H_MIN && H <= H_MAX && S >= S_MIN && S <= S_MAX && V >= V_MIN && V <= V_MAX)
+            {
+                QRgb WHITE = qRgb(255, 255, 255);
+                image.setPixelColor(j, i, WHITE);
+            }
+            else
+            {
+                QRgb BLACK = qRgb(0, 0, 0);
+                image.setPixelColor(j, i, BLACK);
+            }
         }
     }
 
-    string out(outputPlate.begin(), outputPlate.end());
-    QString out2 = QString::fromStdString(out);
-    ui->output->setText(out2);
+    image2 = image2.convertToFormat(QImage::Format_Mono);                                         //change the photo to a BW photo
 
-    QPixmap img1;
-    img1.convertFromImage(image1, Qt::AutoColor);
-
-    ui->photo_1->setPixmap(pixDobb[0]);
-    ui->photo_2->setPixmap(pixDobb[1]);
-    ui->photo_3->setPixmap(pixDobb[2]);
-    ui->photo_4->setPixmap(pixDobb[3]);
-    ui->photo_5->setPixmap(pixDobb[4]);
-    ui->photo_6->setPixmap(pixDobb[5]);
-
-    image1 = image1.convertToFormat(QImage::Format_Mono);                                         //change the photo to a BW photo
-    QImage image2 = image1.scaled(741, 431, Qt::KeepAspectRatio);
-
-
-
-    QPixmap imagepix;
-    imagepix.convertFromImage(image2,Qt::AutoColor);
-    ui->photo->setPixmap(imagepix);
+    QPixmap pix;
+    pix.fromImage(image2);
+    ui->photo->setPixmap(pix);
 }
