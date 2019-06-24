@@ -7,10 +7,10 @@ class ObjectBwLabel
 public:
     ObjectBwLabel();
 
-    int U; // Most up point
-    int R; // Most right point
-    int L; // Most left point
-    int D; // Most down point
+    int U; // Most up point         (Y-as)
+    int R; // Most right point      (X-as)
+    int L; // Most left point       (X-as)
+    int D; // Most down point       (Y-as)
 
     int Labelcounter;
     bool set = false;

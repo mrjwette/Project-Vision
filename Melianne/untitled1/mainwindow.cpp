@@ -91,34 +91,39 @@ void MainWindow::SetHSV(QImage *image, float MaxpixY, float MaxpixX, int h_min, 
 
 void MainWindow::sortOutput()
 {
+    qDebug() << "Voor Sorteren: ";
     for(int i = 0; i < 6; i++)
     {
-        qDebug() << outputOrder[i][0] << outputOrder [i][1];
+        qDebug() << outputInt[i] << outputChar[i];
     }
 
     qDebug();
 
-    for(int i = 5; i > 1; i--)
+    int out, in;
+
+    for (out = 6 - 1; out > 1; out--)
     {
-        for(int j = 0; j < i; j++)
+        for (in = 0; in < out; in++)
         {
-            if(outputOrder[i][0] > outputOrder[i+1][0])
+            if (outputInt[in] > outputInt[in + 1])
             {
-                char temp1 = outputOrder[i][0];
-                char temp2 = outputOrder[i][1];
+                int temp = outputInt[in];
+                char temp2 = outputChar[in];
 
-                outputOrder[i][0] = outputOrder[i+1][0];
-                outputOrder[i][1] = outputOrder[i+1][1];
+                outputInt[in] = outputInt[in+1];
+                outputChar[in] = outputChar[in+1];
 
-                outputOrder[i+1][0] = temp1;
-                outputOrder[i+1][1] = temp2;
+                outputInt[in+1] = temp;
+                outputChar[in+1] = temp2;
             }
         }
     }
 
+    qDebug();
+    qDebug() << "Na sorteren: ";
     for(int i = 0; i < 6; i++)
     {
-        qDebug() << outputOrder[i][0] << outputOrder [i][1];
+        qDebug() << outputInt [i] << outputChar[i];
     }
 }
 
@@ -132,15 +137,13 @@ void MainWindow::on_letterDice_clicked()
     QImage image(filename);
     image = image.convertToFormat(QImage::Format_RGB32);
 
-    int MaxpixY = image.height();//Test is 11
-    int MaxpixX = image.width(); // Test is 10
-    qDebug() << MaxpixX << MaxpixY;
-
-    SetHSV(&image,MaxpixY, MaxpixX, H_MIN, H_MAX, S_MIN, S_MAX, V_MIN, V_MAX);
-    image.invertPixels();
-
+    int MaxpixY = image.height();
+    int MaxpixX = image.width();
+    int minArea = ((MaxpixX*MaxpixY)/100)*1.5;
     ObjectBwLabel objarray[MAX_Capable_Objects];
     int ObjAmount = 0;
+
+    SetHSV(&image,MaxpixY, MaxpixX, H_MIN, H_MAX, S_MIN, S_MAX, V_MIN, V_MAX);
 
     BWLabel bwlbl = BWLabel();
     bwlbl.Setdebug(debugI);
@@ -149,11 +152,13 @@ void MainWindow::on_letterDice_clicked()
     bwlbl.ResizeIm(&MaxpixY,&MaxpixX);
     bwlbl.BWLabel_RegionProps(MaxpixY,MaxpixX, objarray, &ObjAmount,125);
     bwlbl.SetImages(objarray, &ObjAmount);
-    QImage image1 = bwlbl.GetImage();
     bwlbl.Removeborder(objarray, &ObjAmount);
-    qDebug() << ObjAmount;
+    QImage image1 = bwlbl.GetImage();
+    qDebug() << "L: " << objarray->L << "R: " << objarray->R << "U: " << objarray->U << "D: " << objarray->D;
+    QRect rect(objarray->L, objarray->U,objarray->R - objarray->L, objarray->D - objarray->U);
+    image1 = image1.copy(rect);
 
-
+    image1.invertPixels();
 
     QPixmap pixDobb[8];
     for(int i = 0 ;i<ObjAmount;i++)
@@ -164,13 +169,14 @@ void MainWindow::on_letterDice_clicked()
         bwlbl.SetImage(objarray[i].image);
         bwlbl.SetResizefactor(1);
         bwlbl.Setdebug(1);
-        bwlbl.BWLabel_RegionProps(objarray[i].imheight,objarray[i].imwidth,objarrayt,&ObjAmountt,20);
+        bwlbl.BWLabel_RegionProps(objarray[i].imheight,objarray[i].imwidth,objarrayt,&ObjAmountt,10);
         objarray[i].s = QString::number(ObjAmountt);
         objarray[i].image = bwlbl.GetImage();
         NP.loadMasks(objarray[i].image.height(), objarray[i].image.width());
         int index = NP.compareWithMasks(&objarray[i].image);
-        //outputOrder[i][0] = maskerChar[index];
-        outputOrder[i][1] = objarray->L;
+        outputChar[i] = maskerChar[index];
+        outputInt[i] = objarray[i].L;
+        qDebug() << "L: " << objarray[i].L <<  "R: " << objarray[i].R << "U: " << objarray[i].U << "D: " << objarray[i].D;
         QImage image2 = objarray[i].image.scaled(141, 91, Qt::KeepAspectRatio);
         QPixmap imagepix;
         imagepix.convertFromImage(image2,Qt::AutoColor);
@@ -178,7 +184,7 @@ void MainWindow::on_letterDice_clicked()
     }
 
 
-    //sortOutput();
+    sortOutput();
 
     //ui->output->setText(objarray[0].s);
     //ui->output_2->setText(objarray[1].s);
