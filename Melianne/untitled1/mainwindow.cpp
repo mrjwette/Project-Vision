@@ -18,7 +18,7 @@ using namespace std;
 #define MAXPICINPUTHEIGHT 156 // Maximum height for a picture
 #define MAX_Capable_Objects 100 //Maximum amount objects possible per image, set well above expected object count
 
-#define resize 0        //If you want to downscale images to smaller images for faster processing
+#define resize 1        //If you want to downscale images to smaller images for faster processing
 //When resize is set to 0, set scalingfactor to 1
 #define Scalingfactor 1         // Images get scaled down during the process. This is how much
 #define OFFSETPICADJUST 0 // When using images that do not resize well, increase this.
@@ -156,9 +156,9 @@ void MainWindow::on_letterDice_clicked()
     bwlbl.SetImages(objarray, &ObjAmount);
     QImage image1 = bwlbl.GetImage();
     bwlbl.Removeborder(objarray, &ObjAmount);
-    qDebug() << ObjAmount;
-
-
+    QRect rect(objarray->L, objarray->R, objarray->R - objarray->L, objarray->D - objarray->U);
+    image1.copy(rect);
+    int minArea = (image1.height()*image1.width()/100)*3;
 
     QPixmap pixDobb[6];
     for(int i = 0 ;i<ObjAmount;i++)
@@ -169,7 +169,7 @@ void MainWindow::on_letterDice_clicked()
         bwlbl.SetImage(objarray[i].image);
         bwlbl.SetResizefactor(1);
         bwlbl.Setdebug(1);
-        bwlbl.BWLabel_RegionProps(objarray[i].imheight,objarray[i].imwidth,objarrayt,&ObjAmountt,20);
+        bwlbl.BWLabel_RegionProps(objarray[i].imheight,objarray[i].imwidth,objarrayt,&ObjAmountt,minArea);
         objarray[i].s = QString::number(ObjAmountt);
         objarray[i].image = bwlbl.GetImage();
         NP.loadMasks(objarray[i].image.height(), objarray[i].image.width());
@@ -183,7 +183,6 @@ void MainWindow::on_letterDice_clicked()
         pixDobb[i] = imagepix;
         ui->photo_1->setPixmap(imagepix);
     }
-
 
     sortOutput();
 
@@ -206,37 +205,30 @@ void MainWindow::on_letterDice_clicked()
     QString out2 = QString::fromStdString(out);
     ui->output->setText(out2);
 
-    //ui->output->setText(objarray[0].s);
-    //ui->output_2->setText(objarray[1].s);
-    //ui->output_3->setText(objarray[2].s);
-
-    QPixmap img1;
-    img1.convertFromImage(image1, Qt::AutoColor);
-
     ui->photo_1->setPixmap(pixDobb[0]);
     ui->photo_2->setPixmap(pixDobb[1]);
     ui->photo_3->setPixmap(pixDobb[2]);
     ui->photo_4->setPixmap(pixDobb[3]);
     ui->photo_5->setPixmap(pixDobb[4]);
     ui->photo_6->setPixmap(pixDobb[5]);
-//    ui->photo_7->setPixmap(pixDobb[6]);
-//    ui->photo_8->setPixmap(pixDobb[7]);
-
 
     QImage image2 = image1.scaled(741, 431, Qt::KeepAspectRatio);
     QPixmap imagepix;
     imagepix.convertFromImage(image2,Qt::AutoColor);
 
+    ui->photo->setPixmap(imagepix);
+
+
     QPixmap Imageexport;
     Imageexport.convertFromImage(objarray[1].image,Qt::AutoColor);
 
+    //to export the photo, please change the definition of Export to 1
     if(Export)
     {
         QFile file("Export.png");
         file.open(QIODevice::WriteOnly);
         Imageexport.save(&file, "PNG");
     }
-    ui->photo->setPixmap(imagepix);
 }
 
 void MainWindow::on_numberplate_clicked()
@@ -249,34 +241,19 @@ void MainWindow::on_numberplate_clicked()
     QImage image(filename);
     QImage image2 = image;
 
-    for (int i = 0; i < image2.height(); i++)
-    {
-        for (int j = 0; j < image2.width(); j++)
-        {
-            QColor pixel(image2.pixel(j, i));
-            int h, s, v;
-            pixel.getHsv(&h, &s, &v);
-            double H, S, V;
-            H = h / HSV_H;
-            S = s / HSV_S;
-            V = v / HSV_V;
-            //qDebug() << h << s << v;
-            if (H >= H_MIN && H <= H_MAX && S >= S_MIN && S <= S_MAX && V >= V_MIN && V <= V_MAX)
-            {
-                QRgb WHITE = qRgb(255, 255, 255);
-                image.setPixelColor(j, i, WHITE);
-            }
-            else
-            {
-                QRgb BLACK = qRgb(0, 0, 0);
-                image.setPixelColor(j, i, BLACK);
-            }
-        }
-    }
-
+    SetHSV(&image2, image2.height(), image2.width(), H_MIN, H_MAX, S_MIN, S_MAX, V_MIN, V_MAX);
     image2 = image2.convertToFormat(QImage::Format_Mono);                                         //change the photo to a BW photo
 
+    Numberplate NP;
+    NP.loadMasks(image2.height(), image2.width());
+    int index = NP.compareWithMasks(&image2);
+    outputChar[0] = maskerChar[index];
+    QString out = outputChar;
+
+    ui->output->setText(out);
+
     QPixmap pix;
-    pix.fromImage(image2);
+    pix.convertFromImage(image2);
     ui->photo->setPixmap(pix);
+
 }
