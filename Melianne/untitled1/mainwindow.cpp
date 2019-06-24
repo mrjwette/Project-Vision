@@ -25,7 +25,7 @@ using namespace std;
 #define OffsetBWLabel 2
 
 #define debugI 0        //Set 1 for qDebug() << Set 0 for none
-#define Export 0        //If you want to export the image
+#define Export 1        //If you want to export the image
 #define DROPOBJ 100     //If an object is less then 100 pixels bwlabel will not see it
 #define HSV_H 1         //Translate QT HSV Values to Paint.net values
 #define HSV_S 2.55      //Translate QT HSV Values to Paint.net values
@@ -142,7 +142,6 @@ void MainWindow::on_letterDice_clicked()
     qDebug() << MaxpixX << MaxpixY;
 
     SetHSV(&image,MaxpixY, MaxpixX, H_MIN, H_MAX, S_MIN, S_MAX, V_MIN, V_MAX);
-    image.invertPixels();
 
     ObjectBwLabel objarray[MAX_Capable_Objects];
     int ObjAmount = 0;

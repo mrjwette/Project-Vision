@@ -311,7 +311,7 @@ void BWLabel::BWLabel_RegionProps(int MaxpixY, int MaxpixX, ObjectBwLabel * obja
 void BWLabel::SetImages(ObjectBwLabel * objarray, int * count)
 {
     int C = *count;
-    for (int i = 1;i<C; i++) {
+    for (int i = 0;i<C; i++) {
         objarray[i].image = QPixmap(objarray[i].R - objarray[i].L,objarray[i].D - objarray[i].U).toImage();
 
         int height = 0;
@@ -343,7 +343,7 @@ void BWLabel::Removeborder(ObjectBwLabel * objarray, int * count)
     QRgb BLACK = qRgb(0,0,0);
     QRgb WHITE = qRgb(255,255,255);
     int C = *count;
-    for(int i = 1 ;i<C;i++)
+    for(int i = 0 ;i<C;i++)
     {
         if(this->debug)qDebug() << objarray[i].imheight << objarray[i].imwidth;
         for (int y = 0;y<objarray[i].imheight;y++) {

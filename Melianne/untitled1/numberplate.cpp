@@ -5,10 +5,6 @@ Numberplate::Numberplate()
 
 }
 
-//changes the all the pixels that are within the HSV range to white
-//all the other pixels will be changed to black
-
-
 //this is the main function of the number plate assignment
 void Numberplate::init(QImage *image2)
 {
