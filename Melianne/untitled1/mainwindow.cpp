@@ -245,7 +245,7 @@ void MainWindow::on_numberplate_clicked()
     sortOutput();
 
     QVector<char> outputPlate;
-    //hiervoor kan een aparte functie worden gemaakt!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
     for (int i = 0; i < 6; i++)
     {
         outputPlate.push_back(outputChar[i]);
@@ -254,14 +254,6 @@ void MainWindow::on_numberplate_clicked()
             outputPlate.push_back('-');
         }
         else if(isalpha(outputChar[i]) && isdigit(outputChar[i+1]))
-        {
-            outputPlate.push_back('-');
-        }
-        else if (isalpha(outputChar[i - 1]) && isalpha(outputChar[i]) && isalpha(outputChar[i + 1]) && isalpha(outputChar[i + 2]))
-        {
-            outputPlate.push_back('-');
-        }
-        else if (isdigit(outputChar[i - 1]) && isdigit(outputChar[i]) && isdigit(outputChar[i + 1]) && isdigit(outputChar[i + 2]))
         {
             outputPlate.push_back('-');
         }
