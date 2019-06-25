@@ -14,11 +14,14 @@ class MainWindow : public QMainWindow
 public:
     explicit MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
-    void SetHSV(QImage*, float, float, int, int, int, int, int, int);
+
 private slots:
     void on_numberplate_clicked();
+    void SetHSV(QImage *image, float MaxpixY, float MaxpixX, int h_min, int h_max, int s_min, int s_max, int v_min, int v_max);
     void on_letterDice_clicked();
     void sortOutput();
+    void ExportImage(QImage image);
+
 private:
     Ui::MainWindow *ui;
     QString url;
