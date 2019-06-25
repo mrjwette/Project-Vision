@@ -18,7 +18,7 @@ using namespace std;
 #define MAXPICINPUTHEIGHT 156 // Maximum height for a picture
 #define MAX_Capable_Objects 100 //Maximum amount objects possible per image, set well above expected object count
 
-#define resize 1        //If you want to downscale images to smaller images for faster processing
+#define resize 8        //If you want to downscale images to smaller images for faster processing
 //When resize is set to 0, set scalingfactor to 1
 #define Scalingfactor 1         // Images get scaled down during the process. This is how much
 #define OFFSETPICADJUST 0 // When using images that do not resize well, increase this.
@@ -43,10 +43,10 @@ using namespace std;
 */
 
 #define H_MIN 30        //Limit set to recognize Numberplate for HSV Hue (minimum)
-#define H_MAX 55        //Limit set to recognize Numberplate for HSV Hue (maximum)
-#define S_MIN 60        //Limit set to recognize Numberplate for HSV Saturation (minimum)
+#define H_MAX 60        //Limit set to recognize Numberplate for HSV Hue (maximum)
+#define S_MIN 50        //Limit set to recognize Numberplate for HSV Saturation (minimum)
 #define S_MAX 100       //Limit set to recognize Numberplate for HSV Saturation (maximum)
-#define V_MIN 75        //Limit set to recognize Numberplate for HSV Value (minimum)
+#define V_MIN 50        //Limit set to recognize Numberplate for HSV Value (minimum)
 #define V_MAX 100       //Limit set to recognize Numberplate for HSV Value (maximum)
 
 MainWindow::MainWindow(QWidget *parent) :
@@ -143,6 +143,7 @@ void MainWindow::on_letterDice_clicked()
 
     SetHSV(&image,MaxpixY, MaxpixX, H_MIN, H_MAX, S_MIN, S_MAX, V_MIN, V_MAX);
 
+    image.invertPixels();
     ObjectBwLabel objarray[MAX_Capable_Objects];
     int ObjAmount = 0;
 
@@ -151,13 +152,10 @@ void MainWindow::on_letterDice_clicked()
     bwlbl.SetImage(image);
     bwlbl.SetResizefactor(Scalingfactor);
     bwlbl.ResizeIm(&MaxpixY,&MaxpixX);
-    bwlbl.BWLabel_RegionProps(MaxpixY,MaxpixX, objarray, &ObjAmount,125);
+    bwlbl.BWLabel_RegionProps(MaxpixY,MaxpixX, objarray, &ObjAmount,100);
     bwlbl.SetImages(objarray, &ObjAmount);
-    QImage image1 = bwlbl.GetImage();
     bwlbl.Removeborder(objarray, &ObjAmount);
-    QRect rect(objarray->L, objarray->R, objarray->R - objarray->L, objarray->D - objarray->U);
-    image1.copy(rect);
-    int minArea = (image1.height()*image1.width()/100)*3;
+    QImage image1 = bwlbl.GetImage();
 
     QPixmap pixDobb[6];
     for(int i = 0 ;i<ObjAmount;i++)
@@ -168,7 +166,7 @@ void MainWindow::on_letterDice_clicked()
         bwlbl.SetImage(objarray[i].image);
         bwlbl.SetResizefactor(1);
         bwlbl.Setdebug(1);
-        bwlbl.BWLabel_RegionProps(objarray[i].imheight,objarray[i].imwidth,objarrayt,&ObjAmountt,minArea);
+        bwlbl.BWLabel_RegionProps(objarray[i].imheight,objarray[i].imwidth,objarrayt,&ObjAmountt,80);
         objarray[i].s = QString::number(ObjAmountt);
         objarray[i].image = bwlbl.GetImage();
         NP.loadMasks(objarray[i].image.height(), objarray[i].image.width());
@@ -180,54 +178,14 @@ void MainWindow::on_letterDice_clicked()
         QPixmap imagepix;
         imagepix.convertFromImage(image2,Qt::AutoColor);
         pixDobb[i] = imagepix;
-        ui->photo_1->setPixmap(imagepix);
     }
 
-    sortOutput();
 
-    QVector<char> outputPlate;
+    image = image.scaled(741, 431, Qt::KeepAspectRatio);
+    QPixmap pix;
+    pix.convertFromImage(image);
+    ui->photo->setPixmap(pix);
 
-    for (int i = 0; i < 6; i++)
-    {
-        outputPlate.push_back(outputChar[i]);
-        if(isdigit(outputChar[i]) && isalpha(outputChar[i+1]))
-        {
-            outputPlate.push_back('-');
-        }
-        else if(isalpha(outputChar[i]) && isdigit(outputChar[i+1]))
-        {
-            outputPlate.push_back('-');
-        }
-    }
-
-    string out(outputPlate.begin(), outputPlate.end());
-    QString out2 = QString::fromStdString(out);
-    ui->output->setText(out2);
-
-    ui->photo_1->setPixmap(pixDobb[0]);
-    ui->photo_2->setPixmap(pixDobb[1]);
-    ui->photo_3->setPixmap(pixDobb[2]);
-    ui->photo_4->setPixmap(pixDobb[3]);
-    ui->photo_5->setPixmap(pixDobb[4]);
-    ui->photo_6->setPixmap(pixDobb[5]);
-
-    QImage image2 = image1.scaled(741, 431, Qt::KeepAspectRatio);
-    QPixmap imagepix;
-    imagepix.convertFromImage(image2,Qt::AutoColor);
-
-    ui->photo->setPixmap(imagepix);
-
-
-    QPixmap Imageexport;
-    Imageexport.convertFromImage(objarray[1].image,Qt::AutoColor);
-
-    //to export the photo, please change the definition of Export to 1
-    if(Export)
-    {
-        QFile file("Export.png");
-        file.open(QIODevice::WriteOnly);
-        Imageexport.save(&file, "PNG");
-    }
 }
 
 void MainWindow::on_numberplate_clicked()
@@ -256,9 +214,10 @@ void MainWindow::on_numberplate_clicked()
     bwlbl.SetImage(image);
     bwlbl.SetResizefactor(Scalingfactor);
     bwlbl.ResizeIm(&MaxpixY,&MaxpixX);
-    bwlbl.BWLabel_RegionProps(MaxpixY,MaxpixX, objarray, &ObjAmount,150);
+    bwlbl.BWLabel_RegionProps(MaxpixY,MaxpixX, objarray, &ObjAmount,75);
     bwlbl.SetImages(objarray, &ObjAmount);
     bwlbl.Removeborder(objarray, &ObjAmount);
+    QImage image1 = bwlbl.GetImage();
 
     QPixmap pixDobb[6];
     for(int i = 0 ;i<ObjAmount;i++)
@@ -269,7 +228,7 @@ void MainWindow::on_numberplate_clicked()
         bwlbl.SetImage(objarray[i].image);
         bwlbl.SetResizefactor(1);
         bwlbl.Setdebug(1);
-        bwlbl.BWLabel_RegionProps(objarray[i].imheight,objarray[i].imwidth,objarrayt,&ObjAmountt,100);
+        bwlbl.BWLabel_RegionProps(objarray[i].imheight,objarray[i].imwidth,objarrayt,&ObjAmountt,75);
         objarray[i].s = QString::number(ObjAmountt);
         objarray[i].image = bwlbl.GetImage();
         NP.loadMasks(objarray[i].image.height(), objarray[i].image.width());
@@ -319,10 +278,9 @@ void MainWindow::on_numberplate_clicked()
     ui->photo_5->setPixmap(pixDobb[4]);
     ui->photo_6->setPixmap(pixDobb[5]);
 
-    image.invertPixels();
-    image = image.scaled(741, 431, Qt::KeepAspectRatio);
+    image1 = image1.scaled(741, 431, Qt::KeepAspectRatio);
     QPixmap pix;
-    pix.convertFromImage(image);
+    pix.convertFromImage(image1);
     ui->photo->setPixmap(pix);
 
 
@@ -336,4 +294,5 @@ void MainWindow::on_numberplate_clicked()
         file.open(QIODevice::WriteOnly);
         Imageexport.save(&file, "PNG");
     }
+    out2.clear();
 }

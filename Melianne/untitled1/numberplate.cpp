@@ -85,7 +85,6 @@ void Numberplate::loadMasks(int hoogte, int breedte)
     maskers[33] = QPixmap ("C:\\Users\\2125228\\Documents\\MATLAB\\Foto\\Project\\Masks\\8.png").scaled(hoogte, breedte, Qt::KeepAspectRatio);
     maskers[34] = QPixmap ("C:\\Users\\2125228\\Documents\\MATLAB\\Foto\\Project\\Masks\\9.png").scaled(hoogte, breedte, Qt::KeepAspectRatio);
 
-    maskers[35] = QPixmap ("C:\\Users\\2125228\\Documents\\MATLAB\\Foto\\Project\\Masks\\-.png").scaled(hoogte, breedte, Qt::KeepAspectRatio);
 }
 
 //This function compares the given image to all the available characters
@@ -95,7 +94,7 @@ int Numberplate::compareWithMasks(QImage *image)
         int indexHighestPerc = 0;
         double countCorrectPixels = 0;
 
-        for(int i = 0; i < 36; i++)
+        for(int i = 0; i < 35; i++)
         {
             qDebug() << maskerChar[i];
             QImage masks(maskers[i].toImage().convertToFormat(QImage::Format_Mono));
